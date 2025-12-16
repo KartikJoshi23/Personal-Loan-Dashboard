@@ -9,11 +9,34 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, confusion_matrix, roc_curve
 
-st.set_page_config(page_title="Predictor", page_icon="🤖", layout="wide")
+# Page config - SAME TITLE FOR BROWSER TAB
+st.set_page_config(
+    page_title="Universal Bank - Loan Analytics",
+    page_icon="🏦",
+    layout="wide"
+)
 
-# Dark theme CSS
+# SHARED CSS - Must be on every page
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', sans-serif; }
+    .stApp { background-color: #0E1117; }
+    
+    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
+    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
+        display: none;
+    }
+    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
+        content: "📊 Overview";
+        display: block;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    
+    h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
+    
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
         border: 1px solid #6C63FF;
@@ -40,16 +63,8 @@ st.markdown("""
         background: linear-gradient(135deg, #3d1a1a 0%, #5a2d2d 100%);
         border: 2px solid #FC8181;
     }
-    .pred-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-    .pred-prob {
-        font-size: 3.5rem;
-        font-weight: 700;
-        margin: 20px 0;
-    }
+    .pred-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; }
+    .pred-prob { font-size: 3.5rem; font-weight: 700; margin: 20px 0; }
     .accept-card .pred-title, .accept-card .pred-prob { color: #48BB78; }
     .reject-card .pred-title, .reject-card .pred-prob { color: #FC8181; }
     
@@ -69,15 +84,12 @@ st.markdown("""
         border-radius: 12px;
         text-align: center;
     }
-    .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #6C63FF;
-    }
-    .metric-label {
-        color: #A0AEC0;
-        font-size: 0.9rem;
-        margin-top: 5px;
+    .metric-value { font-size: 2rem; font-weight: 700; color: #6C63FF; }
+    .metric-label { color: #A0AEC0; font-size: 0.9rem; margin-top: 5px; }
+    
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
+        border-right: 1px solid #3D4663;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -155,8 +167,19 @@ chart_template = dict(
 )
 
 # Sidebar
-st.sidebar.header("⚙️ Model Settings")
-model_choice = st.sidebar.radio("Select Model", ['Logistic Regression', 'Random Forest'])
+with st.sidebar:
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 3rem;">🏦</div>
+        <h2 style="color: #FAFAFA; margin: 10px 0;">Universal Bank</h2>
+        <p style="color: #A0AEC0; font-size: 0.9rem;">Personal Loan Analytics</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### ⚙️ Model Settings")
+    model_choice = st.radio("Select Model", ['Logistic Regression', 'Random Forest'])
+
 model = models['lr'] if model_choice == 'Logistic Regression' else models['rf']
 
 # Header
@@ -181,36 +204,13 @@ auc = roc_auc_score(models['y_test'], y_prob)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{acc:.1%}</div>
-        <div class="metric-label">Accuracy</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(f'<div class="metric-card"><div class="metric-value">{acc:.1%}</div><div class="metric-label">Accuracy</div></div>', unsafe_allow_html=True)
 with col2:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{prec:.1%}</div>
-        <div class="metric-label">Precision</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(f'<div class="metric-card"><div class="metric-value">{prec:.1%}</div><div class="metric-label">Precision</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{rec:.1%}</div>
-        <div class="metric-label">Recall</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(f'<div class="metric-card"><div class="metric-value">{rec:.1%}</div><div class="metric-label">Recall</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{auc:.3f}</div>
-        <div class="metric-label">ROC-AUC</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-value">{auc:.3f}</div><div class="metric-label">ROC-AUC</div></div>', unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class="insight-box">
@@ -222,7 +222,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Charts Row
+# Charts
 col1, col2 = st.columns(2)
 
 with col1:
@@ -240,12 +240,9 @@ with col2:
     st.markdown("**ROC Curve**")
     fpr, tpr, _ = roc_curve(models['y_test'], y_prob)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', 
-                             line=dict(color='#6C63FF', width=3)))
-    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', 
-                             line=dict(dash='dash', color='#3D4663')))
-    fig.update_layout(height=350, xaxis_title='False Positive Rate', 
-                      yaxis_title='True Positive Rate', **chart_template)
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', line=dict(color='#6C63FF', width=3)))
+    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', line=dict(dash='dash', color='#3D4663')))
+    fig.update_layout(height=350, xaxis_title='False Positive Rate', yaxis_title='True Positive Rate', **chart_template)
     fig.update_xaxes(gridcolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663')
     st.plotly_chart(fig, use_container_width=True)
@@ -351,22 +348,17 @@ if st.button("🔮 Predict Loan Acceptance", type="primary", use_container_width
     
     # Key factors
     st.markdown("**📋 Key Factors for This Prediction:**")
-    
     factors = []
-    if income > 100: factors.append("✅ **High income** (${}K) - strongly positive".format(income))
-    elif income < 50: factors.append("⚠️ **Lower income** (${}K) - may reduce probability".format(income))
+    if income > 100: factors.append(f"✅ **High income** (${income}K) - strongly positive")
+    elif income < 50: factors.append(f"⚠️ **Lower income** (${income}K) - may reduce probability")
     if cd_account == 1: factors.append("✅ **Has CD Account** - strongly positive indicator")
     if education == 3: factors.append("✅ **Advanced education** - positive indicator")
-    if ccavg > 3: factors.append("✅ **High CC spending** (${}K/month) - positive indicator".format(ccavg))
+    if ccavg > 3: factors.append(f"✅ **High CC spending** (${ccavg}K/month) - positive indicator")
     if securities == 1: factors.append("ℹ️ **Has Securities Account** - moderate positive")
     
-    if factors:
-        for f in factors:
-            st.markdown(f)
-    else:
-        st.markdown("ℹ️ No strongly influential factors identified for this profile")
+    for f in factors if factors else ["ℹ️ No strongly influential factors identified for this profile"]:
+        st.markdown(f)
 
-# Model Notes
 with st.expander("📝 Model Notes & Limitations"):
     st.markdown("""
     ### Model Details
@@ -376,12 +368,7 @@ with st.expander("📝 Model Notes & Limitations"):
     - **Random Forest:** 100 trees for higher accuracy
     
     ### Limitations
-    - **Class Imbalance:** ~10% acceptance rate - consider SMOTE for production
+    - **Class Imbalance:** ~10% acceptance rate
     - **ZIP Code:** Not used due to high cardinality
     - **Temporal:** Assumes patterns remain stable over time
-    
-    ### Recommended Use
-    - Use predictions to **prioritize outreach**, not as sole decision criteria
-    - Combine with business rules and customer relationship history
-    - **Retrain periodically** as customer behavior evolves
     """)
