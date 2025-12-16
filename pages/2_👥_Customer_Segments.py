@@ -73,11 +73,33 @@ df['Education_Label'] = df['Education'].map({1: 'Undergraduate', 2: 'Graduate', 
 
 # Sidebar
 st.sidebar.header("🔧 Filters")
-selected_edu = st.sidebar.multiselect("Education", [1,2,3], [1,2,3],
-                                       format_func=lambda x: {1:'Undergraduate', 2:'Graduate', 3:'Advanced'}[x])
-selected_fam = st.sidebar.multiselect("Family Size", list(df['Family'].unique()), list(df['Family'].unique()))
 
-df_f = df[(df['Education'].isin(selected_edu)) & (df['Family'].isin(selected_fam))]
+edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
+selected_edu = st.sidebar.multiselect(
+    "Education Level",
+    options=[1, 2, 3],
+    default=[1, 2, 3],
+    format_func=lambda x: edu_map[x]
+)
+
+selected_fam = st.sidebar.multiselect(
+    "Family Size",
+    options=sorted(df['Family'].unique()),
+    default=list(df['Family'].unique())
+)
+
+income_range = st.sidebar.slider(
+    "Income Range ($K)",
+    int(df['Income'].min()), int(df['Income'].max()),
+    (int(df['Income'].min()), int(df['Income'].max()))
+)
+
+# Apply filters
+df_f = df[
+    (df['Education'].isin(selected_edu)) & 
+    (df['Family'].isin(selected_fam)) &
+    (df['Income'].between(income_range[0], income_range[1]))
+]
 st.sidebar.metric("Records", f"{len(df_f):,}")
 
 colors = {'Not Accepted': '#3D4663', 'Accepted': '#6C63FF'}
@@ -98,9 +120,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 3: ZIP Code Region Analysis
+# CHART 5: ZIP Code Region Analysis
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 3: ZIP Code Region Analysis</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 5: ZIP Code Region Analysis</p>', unsafe_allow_html=True)
 
 st.info("💡 ZIP codes are aggregated to regions (first 3 digits) for clarity. Bubble size = customer count, color = acceptance rate.")
 
@@ -127,6 +149,7 @@ fig.update_yaxes(gridcolor='#3D4663', title='Acceptance Rate (%)')
 st.plotly_chart(fig, use_container_width=True)
 
 best = zip_agg.loc[zip_agg['Acceptance_Rate'].idxmax()]
+
 st.markdown(f"""
 <div class="insight-box">
     <h4>📌 Key Insight</h4>
@@ -139,9 +162,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 8: Education vs Income
+# CHART 6: Education vs Income
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 8: Income Distribution by Education Level</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 6: Income Distribution by Education Level</p>', unsafe_allow_html=True)
 
 fig = px.box(
     df_f, x='Education_Label', y='Income', color='Loan_Status',
@@ -171,9 +194,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 5: Family vs Income with Toggle
+# CHART 7: Family vs Income with Toggle
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 5: Family Size Analysis (Variable Toggle)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 7: Family Size Analysis (Variable Toggle)</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 4])
 with col1:
@@ -212,9 +235,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 9: Mortgage Multi-Dimensional
+# CHART 8: Mortgage Multi-Dimensional
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 9: Mortgage Analysis (Multi-Dimensional)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 8: Mortgage Analysis (Multi-Dimensional)</p>', unsafe_allow_html=True)
 
 st.info("💡 X=Mortgage, Y=Income, Size=Family, Color=Loan Status. Outliers (>95th percentile) excluded for clarity.")
 
