@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -16,13 +15,13 @@ st.markdown("""
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #8B7FFF;
-        border-left: 4px solid #8B7FFF;
+        border: 1px solid #7B68EE;
+        border-left: 4px solid #7B68EE;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #7B68EE !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -42,25 +41,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Colors
-COLORS = {'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'}
-COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+COLORS = {'Not Accepted': '#5A5F72', 'Accepted': '#7B68EE'}
+OUTLIER_COLOR = '#FFA500'
 
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA', family='Inter'),
-    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-    legend=dict(font=dict(color='#FAFAFA')),
-    colorway=COLOR_SEQUENCE
-)
-
-# Load data
 @st.cache_data
 def load_data():
     try:
-        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx",
-                "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
+        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx", "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
         for path in paths:
             try:
                 df = pd.read_excel(path, sheet_name="Data")
@@ -95,7 +82,6 @@ df = load_data()
 df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
 df['Education_Label'] = df['Education'].map({1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'})
 
-# Sidebar
 with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 20px 0;">
@@ -109,25 +95,14 @@ with st.sidebar:
     st.markdown("### 🔧 Filters")
     
     edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
-    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3],
-                                  format_func=lambda x: edu_map[x])
-    
-    selected_fam = st.multiselect("Family Size", options=sorted(df['Family'].unique()),
-                                  default=list(df['Family'].unique()))
-    
-    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
-                            (int(df['Income'].min()), int(df['Income'].max())))
+    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3], format_func=lambda x: edu_map[x])
+    selected_fam = st.multiselect("Family Size", options=sorted(df['Family'].unique()), default=list(df['Family'].unique()))
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()), (int(df['Income'].min()), int(df['Income'].max())))
 
-# Apply filters
-df_f = df[
-    (df['Education'].isin(selected_edu)) & 
-    (df['Family'].isin(selected_fam)) &
-    (df['Income'].between(income_range[0], income_range[1]))
-]
+df_f = df[(df['Education'].isin(selected_edu)) & (df['Family'].isin(selected_fam)) & (df['Income'].between(income_range[0], income_range[1]))]
 
 st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
 
-# Header
 st.markdown("""
 <div style="text-align: center; padding: 10px 0 30px 0;">
     <h1 style="color: #FAFAFA;">👥 Customer Segments</h1>
@@ -136,32 +111,45 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 5: ZIP Code Region Analysis - Teal/Green gradient
+# CHART: ZIP Code Region Analysis
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 5: ZIP Code Region Analysis</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 ZIP Code Region Analysis</p>', unsafe_allow_html=True)
 
 st.info("💡 ZIP codes are aggregated to regions (first 3 digits) for clarity. Bubble size = customer count, color = acceptance rate.")
 
 df_f['ZIP_Region'] = df_f['ZIP_Code'].astype(str).str[:3]
-zip_agg = df_f.groupby('ZIP_Region').agg({
-    'Income': 'mean',
-    'Personal_Loan': ['mean', 'count']
-}).reset_index()
+zip_agg = df_f.groupby('ZIP_Region').agg({'Income': 'mean', 'Personal_Loan': ['mean', 'count']}).reset_index()
 zip_agg.columns = ['ZIP_Region', 'Avg_Income', 'Acceptance_Rate', 'Customers']
 zip_agg['Acceptance_Rate'] *= 100
 zip_agg = zip_agg[zip_agg['Customers'] >= 10]
 
-fig = px.scatter(
-    zip_agg, x='Avg_Income', y='Acceptance_Rate',
-    size='Customers', color='Acceptance_Rate',
-    color_continuous_scale=[[0, '#636B7C'], [0.5, '#4FD1C5'], [1, '#48BB78']],
-    hover_data=['ZIP_Region'],
-    title='ZIP Region: Average Income vs Loan Acceptance Rate'
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=zip_agg['Avg_Income'],
+    y=zip_agg['Acceptance_Rate'],
+    mode='markers',
+    marker=dict(
+        size=zip_agg['Customers'] / 5,
+        color=zip_agg['Acceptance_Rate'],
+        colorscale=[[0, '#5A5F72'], [0.5, '#4FD1C5'], [1, '#2ECC71']],
+        showscale=True,
+        colorbar=dict(title='Rate %', tickfont=dict(color='#A0AEC0'))
+    ),
+    text=zip_agg['ZIP_Region'],
+    hovertemplate='ZIP: %{text}<br>Avg Income: $%{x:.0f}K<br>Rate: %{y:.1f}%<br>Customers: %{marker.size:.0f}<extra></extra>'
+))
+
+fig.update_layout(
+    height=500,
+    title=dict(text='ZIP Region: Average Income vs Loan Acceptance Rate', font=dict(color='#FAFAFA', size=16)),
+    xaxis_title='Average Income ($K)',
+    yaxis_title='Acceptance Rate (%)',
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
 )
-fig.update_layout(height=500, **chart_template)
-fig.update_xaxes(gridcolor='#2D3748', title='Average Income ($K)')
-fig.update_yaxes(gridcolor='#2D3748', title='Acceptance Rate (%)')
-fig.update_traces(marker=dict(line=dict(width=1, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -179,22 +167,35 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 6: Education vs Income - Beautiful box plot
+# CHART: Education vs Income - GROUPED BOX PLOT
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 6: Income Distribution by Education Level</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Income Distribution by Education Level</p>', unsafe_allow_html=True)
 
-fig = px.box(
-    df_f, x='Education_Label', y='Income', color='Loan_Status',
-    color_discrete_map=COLORS,
-    category_orders={'Education_Label': ['Undergraduate', 'Graduate', 'Advanced']},
-    title='Income Distribution by Education Level and Loan Status'
+fig = go.Figure()
+
+for status in ['Not Accepted', 'Accepted']:
+    subset = df_f[df_f['Loan_Status'] == status]
+    fig.add_trace(go.Box(
+        x=subset['Education_Label'],
+        y=subset['Income'],
+        name=status,
+        marker=dict(color=OUTLIER_COLOR, size=4, outliercolor=OUTLIER_COLOR),
+        line=dict(color='#FFFFFF', width=1.5),
+        fillcolor=COLORS[status]
+    ))
+
+fig.update_layout(
+    height=500,
+    title=dict(text='Income Distribution by Education Level and Loan Status', font=dict(color='#FAFAFA', size=16)),
+    yaxis_title='Income ($K)',
+    boxmode='group',
+    legend=dict(orientation='h', y=1.1, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+    xaxis=dict(categoryorder='array', categoryarray=['Undergraduate', 'Graduate', 'Advanced'], gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA')
 )
-fig.update_layout(height=500, **chart_template)
-fig.update_layout(legend=dict(orientation='h', y=1.1, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#2D3748')
-fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
-fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
-                 line=dict(color='#FAFAFA', width=1))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -213,9 +214,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 7: Family vs Income with Toggle - Multi-color
+# CHART: Family vs Income
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 7: Family Size Analysis (Variable Toggle)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Family Size Analysis</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 4])
 with col1:
@@ -224,18 +225,35 @@ with col1:
 plot_df = df_f.copy()
 plot_df['Size'] = plot_df[size_var] + 1
 
-fig = px.scatter(
-    plot_df, x='Family', y='Income',
-    size='Size', color='Loan_Status',
-    color_discrete_map=COLORS,
-    title=f'Income by Family Size (bubble size = {size_var})',
-    hover_data=[size_var, 'Education_Label']
+fig = go.Figure()
+
+for status in ['Not Accepted', 'Accepted']:
+    subset = plot_df[plot_df['Loan_Status'] == status]
+    fig.add_trace(go.Scatter(
+        x=subset['Family'],
+        y=subset['Income'],
+        mode='markers',
+        name=status,
+        marker=dict(
+            color=COLORS[status],
+            size=subset['Size'].clip(upper=30),
+            opacity=0.6,
+            sizemin=4
+        )
+    ))
+
+fig.update_layout(
+    height=500,
+    title=dict(text=f'Income by Family Size (bubble size = {size_var})', font=dict(color='#FAFAFA', size=16)),
+    xaxis_title='Family Size',
+    yaxis_title='Income ($K)',
+    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
 )
-fig.update_layout(height=500, **chart_template)
-fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#2D3748', title='Family Size')
-fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
-fig.update_traces(marker=dict(opacity=0.7, sizemin=4, line=dict(width=0.5, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -248,46 +266,5 @@ st.markdown(f"""
     <p><strong>Finding:</strong> Family size <strong>{int(best_fam)}</strong> shows the highest acceptance rate 
     (<strong>{fam_rates[best_fam]:.1f}%</strong>). Toggle between Mortgage and CCAvg to see additional patterns.</p>
     <p><strong>Implication:</strong> Family size influences loan needs. Larger families may have higher financial requirements.</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# =============================================================================
-# CHART 8: Mortgage Multi-Dimensional - Pink accent
-# =============================================================================
-st.markdown('<p class="section-header">📊 Chart 8: Mortgage Analysis (Multi-Dimensional)</p>', unsafe_allow_html=True)
-
-st.info("💡 X=Mortgage, Y=Income, Size=Family, Color=Loan Status. Outliers (>95th percentile) excluded for clarity.")
-
-pctl = df_f['Mortgage'].quantile(0.95)
-plot_df = df_f[df_f['Mortgage'] <= pctl]
-
-fig = px.scatter(
-    plot_df, x='Mortgage', y='Income',
-    size='Family', color='Loan_Status',
-    color_discrete_map=COLORS,
-    size_max=20,
-    title='Mortgage vs Income (Size=Family, Color=Loan Status)',
-    hover_data=['Education_Label', 'CCAvg', 'Age']
-)
-fig.update_layout(height=500, **chart_template)
-fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#2D3748', title='Mortgage ($K)')
-fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
-fig.update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='#1E2130')))
-
-st.plotly_chart(fig, use_container_width=True)
-
-has_m = df_f[df_f['Mortgage'] > 0]['Personal_Loan'].mean() * 100
-no_m = df_f[df_f['Mortgage'] == 0]['Personal_Loan'].mean() * 100
-
-st.markdown(f"""
-<div class="insight-box">
-    <h4>📌 Key Insight</h4>
-    <p><strong>Finding:</strong> Customers with mortgage: <strong>{has_m:.1f}%</strong> acceptance rate vs 
-    <strong>{no_m:.1f}%</strong> for those without mortgage.</p>
-    <p><strong>Implication:</strong> Mortgage status {'slightly increases' if has_m > no_m else 'slightly decreases'} loan acceptance, 
-    but income remains the dominant factor.</p>
 </div>
 """, unsafe_allow_html=True)
