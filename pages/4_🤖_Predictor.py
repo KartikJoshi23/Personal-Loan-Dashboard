@@ -9,43 +9,25 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, confusion_matrix, roc_curve
 
-# Page config - SAME TITLE FOR BROWSER TAB
-st.set_page_config(
-    page_title="Universal Bank - Loan Analytics",
-    page_icon="🏦",
-    layout="wide"
-)
+st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# SHARED CSS - Must be on every page
+# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
     * { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #0E1117; }
-    
-    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
-    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
-        display: none;
-    }
-    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
-        content: "📊 Overview";
-        display: block;
-        margin-left: 10px;
-        font-size: 14px;
-    }
-    
     h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #6C63FF;
-        border-left: 4px solid #6C63FF;
+        border: 1px solid #8B7FFF;
+        border-left: 4px solid #8B7FFF;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #6C63FF !important; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #8B7FFF !important; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -84,7 +66,7 @@ st.markdown("""
         border-radius: 12px;
         text-align: center;
     }
-    .metric-value { font-size: 2rem; font-weight: 700; color: #6C63FF; }
+    .metric-value { font-size: 2rem; font-weight: 700; color: #8B7FFF; }
     .metric-label { color: #A0AEC0; font-size: 0.9rem; margin-top: 5px; }
     
     section[data-testid="stSidebar"] {
@@ -93,6 +75,18 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Colors
+COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+
+chart_template = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#FAFAFA', family='Inter'),
+    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+    legend=dict(font=dict(color='#FAFAFA')),
+    colorway=COLOR_SEQUENCE
+)
 
 # Load data
 @st.cache_data
@@ -132,7 +126,6 @@ def load_data():
 
 df = load_data()
 
-# Features
 features = ['Age', 'Experience', 'Income', 'Family', 'CCAvg', 'Education', 
             'Mortgage', 'Securities_Account', 'CD_Account', 'Online', 'CreditCard']
 features = [f for f in features if f in df.columns]
@@ -140,7 +133,6 @@ features = [f for f in features if f in df.columns]
 X = df[features]
 y = df['Personal_Loan']
 
-# Train models
 @st.cache_resource
 def train_models():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -158,13 +150,6 @@ def train_models():
     return {'lr': lr, 'rf': rf, 'scaler': scaler, 'X_test': X_test_s, 'y_test': y_test, 'features': features}
 
 models = train_models()
-
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA'),
-    title_font=dict(size=16, color='#FAFAFA')
-)
 
 # Sidebar
 with st.sidebar:
@@ -202,7 +187,6 @@ rec = recall_score(models['y_test'], y_pred)
 auc = roc_auc_score(models['y_test'], y_prob)
 
 col1, col2, col3, col4 = st.columns(4)
-
 with col1:
     st.markdown(f'<div class="metric-card"><div class="metric-value">{acc:.1%}</div><div class="metric-label">Accuracy</div></div>', unsafe_allow_html=True)
 with col2:
@@ -230,7 +214,7 @@ with col1:
     cm = confusion_matrix(models['y_test'], y_pred)
     fig = go.Figure(data=go.Heatmap(
         z=cm, x=['Predicted: No', 'Predicted: Yes'], y=['Actual: No', 'Actual: Yes'],
-        colorscale=[[0, '#1E2130'], [1, '#6C63FF']],
+        colorscale=[[0, '#1E2130'], [0.5, '#4FD1C5'], [1, '#8B7FFF']],
         text=cm, texttemplate='%{text}', textfont={'size': 18, 'color': '#FAFAFA'}
     ))
     fig.update_layout(height=350, **chart_template)
@@ -240,11 +224,13 @@ with col2:
     st.markdown("**ROC Curve**")
     fpr, tpr, _ = roc_curve(models['y_test'], y_prob)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', line=dict(color='#6C63FF', width=3)))
-    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', line=dict(dash='dash', color='#3D4663')))
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', 
+                             line=dict(color='#8B7FFF', width=3),
+                             fill='tozeroy', fillcolor='rgba(139, 127, 255, 0.2)'))
+    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', line=dict(dash='dash', color='#636B7C')))
     fig.update_layout(height=350, xaxis_title='False Positive Rate', yaxis_title='True Positive Rate', **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663')
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748')
     st.plotly_chart(fig, use_container_width=True)
 
 # Feature Importance
@@ -254,19 +240,37 @@ st.markdown('<p class="section-header">🔍 Feature Importance</p>', unsafe_allo
 if model_choice == 'Logistic Regression':
     coef = model.coef_[0]
     imp_df = pd.DataFrame({'Feature': models['features'], 'Coefficient': coef}).sort_values('Coefficient')
-    fig = px.bar(imp_df, x='Coefficient', y='Feature', orientation='h',
-                 color='Coefficient', color_continuous_scale='RdBu_r',
-                 title='Logistic Regression Coefficients (Standardized)')
+    
+    # Create colors based on positive/negative
+    imp_df['Color'] = imp_df['Coefficient'].apply(lambda x: '#48BB78' if x > 0 else '#FC8181')
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=imp_df['Coefficient'],
+        y=imp_df['Feature'],
+        orientation='h',
+        marker_color=imp_df['Color'],
+        text=imp_df['Coefficient'].round(3),
+        textposition='outside',
+        textfont=dict(color='#FAFAFA')
+    ))
+    fig.update_layout(height=450, title='Logistic Regression Coefficients (Standardized)', **chart_template)
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748')
 else:
     imp = model.feature_importances_
     imp_df = pd.DataFrame({'Feature': models['features'], 'Importance': imp}).sort_values('Importance')
+    
     fig = px.bar(imp_df, x='Importance', y='Feature', orientation='h',
-                 color='Importance', color_continuous_scale=[[0, '#1E2130'], [1, '#48BB78']],
-                 title='Random Forest Feature Importance')
+                 color='Importance',
+                 color_continuous_scale=[[0, '#636B7C'], [0.5, '#4FD1C5'], [1, '#48BB78']],
+                 title='Random Forest Feature Importance',
+                 text='Importance')
+    fig.update_traces(texttemplate='%{text:.3f}', textposition='outside', textfont=dict(color='#FAFAFA'))
+    fig.update_layout(height=450, showlegend=False, **chart_template)
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748')
 
-fig.update_layout(height=450, showlegend=False, **chart_template)
-fig.update_xaxes(gridcolor='#3D4663')
-fig.update_yaxes(gridcolor='#3D4663')
 st.plotly_chart(fig, use_container_width=True)
 
 # Prediction Form
