@@ -60,7 +60,6 @@ def load_data():
     except:
         pass
     
-    # Sample data fallback
     np.random.seed(42)
     n = 5000
     df = pd.DataFrame({
@@ -100,20 +99,22 @@ selected_edu = st.sidebar.multiselect(
     format_func=lambda x: edu_map[x]
 )
 
+selected_family = st.sidebar.multiselect(
+    "Family Size",
+    options=sorted(df['Family'].unique()),
+    default=list(df['Family'].unique())
+)
+
 # Apply filters
-df_f = df[(df['Income'].between(income_range[0], income_range[1])) & (df['Education'].isin(selected_edu))]
+df_f = df[
+    (df['Income'].between(income_range[0], income_range[1])) & 
+    (df['Education'].isin(selected_edu)) &
+    (df['Family'].isin(selected_family))
+]
 st.sidebar.metric("Records", f"{len(df_f):,}")
 
 # Colors
 colors = {'Not Accepted': '#3D4663', 'Accepted': '#6C63FF'}
-
-# Header
-st.markdown("""
-<div style="text-align: center; padding: 10px 0 30px 0;">
-    <h1 style="color: #FAFAFA;">📈 Detailed Analysis</h1>
-    <p style="color: #A0AEC0;">Explore distributions, correlations, and patterns in the data</p>
-</div>
-""", unsafe_allow_html=True)
 
 # Chart template for dark theme
 chart_template = dict(
@@ -122,6 +123,14 @@ chart_template = dict(
     font=dict(color='#FAFAFA'),
     title_font=dict(size=16, color='#FAFAFA')
 )
+
+# Header
+st.markdown("""
+<div style="text-align: center; padding: 10px 0 30px 0;">
+    <h1 style="color: #FAFAFA;">📈 Detailed Analysis</h1>
+    <p style="color: #A0AEC0;">Explore distributions, correlations, and patterns in the data</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =============================================================================
 # CHART 1: Income & Age Histograms
@@ -195,9 +204,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 4: Correlation Heatmap
+# CHART 3: Correlation Heatmap
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 4: Correlation Heatmap</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 3: Correlation Heatmap</p>', unsafe_allow_html=True)
 
 num_cols = ['Age', 'Experience', 'Income', 'Family', 'CCAvg', 'Education', 
             'Mortgage', 'Personal_Loan', 'Securities_Account', 'CD_Account', 'Online', 'CreditCard']
@@ -240,9 +249,9 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 7: Box Plots
+# CHART 4: Box Plots
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 7: Distribution Comparison (Box Plots)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 4: Distribution Comparison (Box Plots)</p>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
