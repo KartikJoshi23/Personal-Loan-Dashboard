@@ -307,7 +307,7 @@ sec_penetration = (accepters_df['Securities_Account'].sum() / len(accepters_df) 
 st.markdown("""
 <div style="text-align: center; padding: 20px 0;">
     <h1 style="font-size: 2.5rem; margin-bottom: 10px;">🏦 Universal Bank - Personal Loan Campaign</h1>
-    <p style="color: #A0AEC0; font-size: 1.1rem;">Analyze customer data to predict loan acceptance and identify opportunities</p>
+    <p style="color: #A0AEC0; font-size: 1.1rem;">Analyze customer data to predict loan acceptance and identify opportunities.</p>
 </div>
 """, unsafe_allow_html=True)
 
