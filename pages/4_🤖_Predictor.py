@@ -11,7 +11,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_a
 
 st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -21,13 +20,13 @@ st.markdown("""
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #8B7FFF;
-        border-left: 4px solid #8B7FFF;
+        border: 1px solid #7B68EE;
+        border-left: 4px solid #7B68EE;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #8B7FFF !important; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #7B68EE !important; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -39,16 +38,16 @@ st.markdown("""
     }
     .accept-card {
         background: linear-gradient(135deg, #1a3d1a 0%, #2d5a2d 100%);
-        border: 2px solid #48BB78;
+        border: 2px solid #2ECC71;
     }
     .reject-card {
         background: linear-gradient(135deg, #3d1a1a 0%, #5a2d2d 100%);
-        border: 2px solid #FC8181;
+        border: 2px solid #E74C3C;
     }
     .pred-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; }
     .pred-prob { font-size: 3.5rem; font-weight: 700; margin: 20px 0; }
-    .accept-card .pred-title, .accept-card .pred-prob { color: #48BB78; }
-    .reject-card .pred-title, .reject-card .pred-prob { color: #FC8181; }
+    .accept-card .pred-title, .accept-card .pred-prob { color: #2ECC71; }
+    .reject-card .pred-title, .reject-card .pred-prob { color: #E74C3C; }
     
     .section-header {
         color: #FAFAFA;
@@ -66,7 +65,7 @@ st.markdown("""
         border-radius: 12px;
         text-align: center;
     }
-    .metric-value { font-size: 2rem; font-weight: 700; color: #8B7FFF; }
+    .metric-value { font-size: 2rem; font-weight: 700; color: #7B68EE; }
     .metric-label { color: #A0AEC0; font-size: 0.9rem; margin-top: 5px; }
     
     section[data-testid="stSidebar"] {
@@ -76,24 +75,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Colors
-COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
-
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA', family='Inter'),
-    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-    legend=dict(font=dict(color='#FAFAFA')),
-    colorway=COLOR_SEQUENCE
-)
-
-# Load data
 @st.cache_data
 def load_data():
     try:
-        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx",
-                "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
+        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx", "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
         for path in paths:
             try:
                 df = pd.read_excel(path, sheet_name="Data")
@@ -126,8 +111,7 @@ def load_data():
 
 df = load_data()
 
-features = ['Age', 'Experience', 'Income', 'Family', 'CCAvg', 'Education', 
-            'Mortgage', 'Securities_Account', 'CD_Account', 'Online', 'CreditCard']
+features = ['Age', 'Experience', 'Income', 'Family', 'CCAvg', 'Education', 'Mortgage', 'Securities_Account', 'CD_Account', 'Online', 'CreditCard']
 features = [f for f in features if f in df.columns]
 
 X = df[features]
@@ -136,22 +120,17 @@ y = df['Personal_Loan']
 @st.cache_resource
 def train_models():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-    
     scaler = StandardScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s = scaler.transform(X_test)
-    
     lr = LogisticRegression(random_state=42, max_iter=1000)
     lr.fit(X_train_s, y_train)
-    
     rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
     rf.fit(X_train_s, y_train)
-    
     return {'lr': lr, 'rf': rf, 'scaler': scaler, 'X_test': X_test_s, 'y_test': y_test, 'features': features}
 
 models = train_models()
 
-# Sidebar
 with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 20px 0;">
@@ -167,7 +146,6 @@ with st.sidebar:
 
 model = models['lr'] if model_choice == 'Logistic Regression' else models['rf']
 
-# Header
 st.markdown("""
 <div style="text-align: center; padding: 10px 0 30px 0;">
     <h1 style="color: #FAFAFA;">🤖 Personal Loan Predictor</h1>
@@ -175,7 +153,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Model Performance
 st.markdown(f'<p class="section-header">📊 Model Performance: {model_choice}</p>', unsafe_allow_html=True)
 
 y_pred = model.predict(models['X_test'])
@@ -206,7 +183,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Charts
 col1, col2 = st.columns(2)
 
 with col1:
@@ -214,66 +190,81 @@ with col1:
     cm = confusion_matrix(models['y_test'], y_pred)
     fig = go.Figure(data=go.Heatmap(
         z=cm, x=['Predicted: No', 'Predicted: Yes'], y=['Actual: No', 'Actual: Yes'],
-        colorscale=[[0, '#1E2130'], [0.5, '#4FD1C5'], [1, '#8B7FFF']],
+        colorscale=[[0, '#1E2130'], [0.5, '#4FD1C5'], [1, '#7B68EE']],
         text=cm, texttemplate='%{text}', textfont={'size': 18, 'color': '#FAFAFA'}
     ))
-    fig.update_layout(height=350, **chart_template)
+    fig.update_layout(
+        height=350,
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(tickfont=dict(color='#A0AEC0'))
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.markdown("**ROC Curve**")
     fpr, tpr, _ = roc_curve(models['y_test'], y_prob)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', 
-                             line=dict(color='#8B7FFF', width=3),
-                             fill='tozeroy', fillcolor='rgba(139, 127, 255, 0.2)'))
-    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', line=dict(dash='dash', color='#636B7C')))
-    fig.update_layout(height=350, xaxis_title='False Positive Rate', yaxis_title='True Positive Rate', **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748')
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC (AUC={auc:.3f})', line=dict(color='#7B68EE', width=3), fill='tozeroy', fillcolor='rgba(123, 104, 238, 0.2)'))
+    fig.add_trace(go.Scatter(x=[0,1], y=[0,1], name='Random', line=dict(dash='dash', color='#5A5F72')))
+    fig.update_layout(
+        height=350,
+        xaxis_title='False Positive Rate',
+        yaxis_title='True Positive Rate',
+        legend=dict(font=dict(color='#FAFAFA')),
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-# Feature Importance
 st.markdown("---")
 st.markdown('<p class="section-header">🔍 Feature Importance</p>', unsafe_allow_html=True)
 
 if model_choice == 'Logistic Regression':
     coef = model.coef_[0]
     imp_df = pd.DataFrame({'Feature': models['features'], 'Coefficient': coef}).sort_values('Coefficient')
-    
-    # Create colors based on positive/negative
-    imp_df['Color'] = imp_df['Coefficient'].apply(lambda x: '#48BB78' if x > 0 else '#FC8181')
+    colors = ['#2ECC71' if c > 0 else '#E74C3C' for c in imp_df['Coefficient']]
     
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=imp_df['Coefficient'],
-        y=imp_df['Feature'],
-        orientation='h',
-        marker_color=imp_df['Color'],
-        text=imp_df['Coefficient'].round(3),
-        textposition='outside',
-        textfont=dict(color='#FAFAFA')
+        x=imp_df['Coefficient'], y=imp_df['Feature'], orientation='h',
+        marker_color=colors,
+        text=[f"{v:.3f}" for v in imp_df['Coefficient']],
+        textposition='outside', textfont=dict(color='#FAFAFA')
     ))
-    fig.update_layout(height=450, title='Logistic Regression Coefficients (Standardized)', **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748')
+    fig.update_layout(
+        height=450,
+        title=dict(text='Logistic Regression Coefficients (Standardized)', font=dict(color='#FAFAFA', size=16)),
+        paper_bgcolor='#0E1117', plot_bgcolor='#0E1117', font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+    )
 else:
     imp = model.feature_importances_
     imp_df = pd.DataFrame({'Feature': models['features'], 'Importance': imp}).sort_values('Importance')
     
-    fig = px.bar(imp_df, x='Importance', y='Feature', orientation='h',
-                 color='Importance',
-                 color_continuous_scale=[[0, '#636B7C'], [0.5, '#4FD1C5'], [1, '#48BB78']],
-                 title='Random Forest Feature Importance',
-                 text='Importance')
-    fig.update_traces(texttemplate='%{text:.3f}', textposition='outside', textfont=dict(color='#FAFAFA'))
-    fig.update_layout(height=450, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=imp_df['Importance'], y=imp_df['Feature'], orientation='h',
+        marker=dict(color=imp_df['Importance'], colorscale=[[0, '#5A5F72'], [0.5, '#4FD1C5'], [1, '#2ECC71']]),
+        text=[f"{v:.3f}" for v in imp_df['Importance']],
+        textposition='outside', textfont=dict(color='#FAFAFA')
+    ))
+    fig.update_layout(
+        height=450,
+        title=dict(text='Random Forest Feature Importance', font=dict(color='#FAFAFA', size=16)),
+        paper_bgcolor='#0E1117', plot_bgcolor='#0E1117', font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+    )
 
 st.plotly_chart(fig, use_container_width=True)
 
-# Prediction Form
 st.markdown("---")
 st.markdown('<p class="section-header">🎯 Make a Prediction</p>', unsafe_allow_html=True)
 
@@ -289,8 +280,7 @@ with col1:
 
 with col2:
     ccavg = st.number_input("CC Avg Spending ($K/month)", 0.0, 15.0, 1.5, 0.1)
-    education = st.selectbox("Education", [1, 2, 3], index=1,
-                             format_func=lambda x: {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}[x])
+    education = st.selectbox("Education", [1, 2, 3], index=1, format_func=lambda x: {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}[x])
     mortgage = st.number_input("Mortgage ($K)", 0, 1000, 0)
 
 with col3:
@@ -300,8 +290,7 @@ with col3:
     creditcard = st.selectbox("Credit Card", [0, 1], format_func=lambda x: 'Yes' if x else 'No')
 
 if st.button("🔮 Predict Loan Acceptance", type="primary", use_container_width=True):
-    input_data = np.array([[age, experience, income, family, ccavg, education, mortgage,
-                           securities, cd_account, online, creditcard]])
+    input_data = np.array([[age, experience, income, family, ccavg, education, mortgage, securities, cd_account, online, creditcard]])
     input_scaled = models['scaler'].transform(input_data)
     
     pred = model.predict(input_scaled)[0]
@@ -336,7 +325,7 @@ if st.button("🔮 Predict Loan Acceptance", type="primary", use_container_width
             number={'suffix': '%', 'font': {'color': '#FAFAFA', 'size': 40}},
             gauge={
                 'axis': {'range': [0, 100], 'tickcolor': '#FAFAFA'},
-                'bar': {'color': '#48BB78' if prob > 0.5 else '#FC8181'},
+                'bar': {'color': '#2ECC71' if prob > 0.5 else '#E74C3C'},
                 'bgcolor': '#1E2130',
                 'bordercolor': '#3D4663',
                 'steps': [
@@ -347,10 +336,9 @@ if st.button("🔮 Predict Loan Acceptance", type="primary", use_container_width
                 'threshold': {'line': {'color': '#FAFAFA', 'width': 3}, 'thickness': 0.8, 'value': 50}
             }
         ))
-        fig.update_layout(height=300, **chart_template)
+        fig.update_layout(height=300, paper_bgcolor='#0E1117', plot_bgcolor='#0E1117', font=dict(color='#FAFAFA'))
         st.plotly_chart(fig, use_container_width=True)
     
-    # Key factors
     st.markdown("**📋 Key Factors for This Prediction:**")
     factors = []
     if income > 100: factors.append(f"✅ **High income** (${income}K) - strongly positive")
