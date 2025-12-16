@@ -76,11 +76,33 @@ df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
 
 # Sidebar
 st.sidebar.header("🔧 Filters")
-income_range = st.sidebar.slider("Income Range ($K)",
-    int(df['Income'].min()), int(df['Income'].max()),
-    (int(df['Income'].min()), int(df['Income'].max())))
 
-df_f = df[df['Income'].between(income_range[0], income_range[1])]
+income_range = st.sidebar.slider(
+    "Income Range ($K)",
+    int(df['Income'].min()), int(df['Income'].max()),
+    (int(df['Income'].min()), int(df['Income'].max()))
+)
+
+cd_filter = st.sidebar.multiselect(
+    "CD Account",
+    options=[0, 1],
+    default=[0, 1],
+    format_func=lambda x: 'Yes' if x == 1 else 'No'
+)
+
+sec_filter = st.sidebar.multiselect(
+    "Securities Account",
+    options=[0, 1],
+    default=[0, 1],
+    format_func=lambda x: 'Yes' if x == 1 else 'No'
+)
+
+# Apply filters
+df_f = df[
+    (df['Income'].between(income_range[0], income_range[1])) &
+    (df['CD_Account'].isin(cd_filter)) &
+    (df['Securities_Account'].isin(sec_filter))
+]
 st.sidebar.metric("Records", f"{len(df_f):,}")
 
 chart_template = dict(
@@ -99,9 +121,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 6: Cross-Sell Pattern Analysis
+# CHART 9: Cross-Sell Pattern Analysis
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 6: Cross-Sell Pattern Analysis</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Chart 9: Cross-Sell Pattern Analysis</p>', unsafe_allow_html=True)
 
 st.info("💡 Analyzing how combinations of existing products (Securities, CD Account, Credit Card) impact loan acceptance rates.")
 
