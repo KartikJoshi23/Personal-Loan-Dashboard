@@ -17,13 +17,13 @@ st.markdown("""
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #8B7FFF;
-        border-left: 4px solid #8B7FFF;
+        border: 1px solid #7B68EE;
+        border-left: 4px solid #7B68EE;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #7B68EE !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -43,18 +43,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Colors - Updated beautiful scheme
-COLORS = {'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'}
-COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+# ============================================
+# EXACT COLORS FROM REFERENCE
+# ============================================
+COLORS = {
+    'Not Accepted': '#5A5F72',  # Muted gray
+    'Accepted': '#7B68EE'       # Medium purple (exact match)
+}
+OUTLIER_COLOR = '#FFA500'  # Orange for outliers
 
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA', family='Inter'),
-    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-    legend=dict(font=dict(color='#FAFAFA')),
-    colorway=COLOR_SEQUENCE
-)
+# Dark theme chart template
+def get_chart_layout():
+    return dict(
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA', family='Inter', size=12),
+        title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+        legend=dict(
+            font=dict(color='#FAFAFA', size=11),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        xaxis=dict(
+            gridcolor='#2D3748',
+            zerolinecolor='#2D3748',
+            tickfont=dict(color='#A0AEC0'),
+            title_font=dict(color='#A0AEC0')
+        ),
+        yaxis=dict(
+            gridcolor='#2D3748',
+            zerolinecolor='#2D3748',
+            tickfont=dict(color='#A0AEC0'),
+            title_font=dict(color='#A0AEC0')
+        )
+    )
 
 # Load data
 @st.cache_data
@@ -94,6 +115,7 @@ def load_data():
 
 df = load_data()
 df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
+df['Education_Label'] = df['Education'].map({1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'})
 
 # Sidebar
 with st.sidebar:
@@ -136,25 +158,52 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 1: Income & Age Histograms
+# CHART 1: Income & Age Histograms - EXACT REFERENCE STYLE
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 1: Income & Age Distributions by Loan Status</p>', unsafe_allow_html=True)
 
 fig = make_subplots(rows=1, cols=2, subplot_titles=('Income Distribution', 'Age Distribution'))
 
-for status, color in COLORS.items():
+# Add histograms with EXACT colors
+for status in ['Not Accepted', 'Accepted']:
     subset = df_f[df_f['Loan_Status'] == status]
-    fig.add_trace(go.Histogram(x=subset['Income'], name=status, marker_color=color, opacity=0.75), row=1, col=1)
-    fig.add_trace(go.Histogram(x=subset['Age'], name=status, marker_color=color, opacity=0.75, showlegend=False), row=1, col=2)
+    color = COLORS[status]
+    
+    fig.add_trace(
+        go.Histogram(
+            x=subset['Income'], 
+            name=status, 
+            marker_color=color,
+            opacity=0.75,
+            legendgroup=status
+        ), 
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Histogram(
+            x=subset['Age'], 
+            name=status, 
+            marker_color=color,
+            opacity=0.75,
+            showlegend=False,
+            legendgroup=status
+        ), 
+        row=1, col=2
+    )
 
 fig.update_layout(
-    barmode='overlay', height=450,
-    legend=dict(orientation='h', y=1.15, x=0.5, xanchor='center'),
-    **chart_template
+    barmode='overlay',
+    height=450,
+    legend=dict(
+        orientation='h', 
+        y=1.15, 
+        x=0.5, 
+        xanchor='center',
+        font=dict(color='#FAFAFA')
+    ),
+    **get_chart_layout()
 )
 fig.update_annotations(font=dict(color='#FAFAFA', size=14))
-fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title_font=dict(color='#A0AEC0'))
-fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title_font=dict(color='#A0AEC0'))
 fig.update_xaxes(title_text='Income ($K)', row=1, col=1)
 fig.update_xaxes(title_text='Age (Years)', row=1, col=2)
 fig.update_yaxes(title_text='Count', row=1, col=1)
@@ -176,20 +225,36 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 2: Scatter Plot - CCAvg vs Income
+# CHART 2: Scatter Plot - EXACT REFERENCE STYLE
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 2: Credit Card Spending vs Income</p>', unsafe_allow_html=True)
 
-fig = px.scatter(
-    df_f, x='Income', y='CCAvg', color='Loan_Status',
-    color_discrete_map=COLORS, opacity=0.6,
-    title='Credit Card Average Spending vs Income by Loan Status'
+fig = go.Figure()
+
+# Plot Not Accepted first (so Accepted appears on top)
+for status in ['Not Accepted', 'Accepted']:
+    subset = df_f[df_f['Loan_Status'] == status]
+    fig.add_trace(go.Scatter(
+        x=subset['Income'],
+        y=subset['CCAvg'],
+        mode='markers',
+        name=status,
+        marker=dict(
+            color=COLORS[status],
+            size=7,
+            opacity=0.6,
+            line=dict(width=0)
+        )
+    ))
+
+fig.update_layout(
+    height=500,
+    title='Credit Card Average Spending vs Income by Loan Status',
+    xaxis_title='Income ($K)',
+    yaxis_title='CC Avg Spending ($K/month)',
+    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'),
+    **get_chart_layout()
 )
-fig.update_layout(height=500, **chart_template)
-fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title='Income ($K)')
-fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title='CC Avg Spending ($K/month)')
-fig.update_traces(marker=dict(size=8, line=dict(width=0.5, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -200,7 +265,7 @@ st.markdown(f"""
 <div class="insight-box">
     <h4>📌 Key Insight</h4>
     <p><strong>Finding:</strong> Clear clustering pattern — loan accepters concentrate in the <strong>high-income, high-spending</strong> 
-    quadrant (upper right). Average CC spend: <strong>${cc_acc:.2f}K/month</strong> for accepters vs <strong>${cc_non:.2f}K/month</strong> for non-accepters.</p>
+    quadrant. Average CC spend: <strong>${cc_acc:.2f}K/month</strong> for accepters vs <strong>${cc_non:.2f}K/month</strong> for non-accepters.</p>
     <p><strong>Implication:</strong> Customers with both high income AND high credit card spending are prime loan candidates.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -208,7 +273,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 3: Correlation Heatmap
+# CHART 3: Correlation Heatmap - Purple-Orange diverging
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 3: Correlation Heatmap</p>', unsafe_allow_html=True)
 
@@ -218,25 +283,32 @@ num_cols = [c for c in num_cols if c in df_f.columns]
 
 corr = df_f[num_cols].corr()
 
-# Beautiful purple-orange diverging colorscale
+# Purple-Orange diverging colorscale
+colorscale = [
+    [0.0, '#E74C3C'],   # Red for strong negative
+    [0.25, '#F39C12'],  # Orange for negative
+    [0.5, '#1E2130'],   # Dark neutral
+    [0.75, '#5DADE2'],  # Blue for positive
+    [1.0, '#7B68EE']    # Purple for strong positive
+]
+
 fig = go.Figure(data=go.Heatmap(
     z=corr.values,
     x=corr.columns,
     y=corr.columns,
-    colorscale=[
-        [0.0, '#FC8181'],   # Red for negative
-        [0.25, '#F6AD55'],  # Orange
-        [0.5, '#1E2130'],   # Dark center
-        [0.75, '#63B3ED'],  # Blue
-        [1.0, '#8B7FFF']    # Purple for positive
-    ],
+    colorscale=colorscale,
     zmid=0,
     text=np.round(corr.values, 2),
     texttemplate='%{text}',
-    textfont={'size': 9, 'color': '#FAFAFA'}
+    textfont={'size': 9, 'color': '#FAFAFA'},
+    hovertemplate='%{x} vs %{y}: %{z:.3f}<extra></extra>'
 ))
 
-fig.update_layout(height=600, title='Correlation Matrix - All Numeric Variables', **chart_template)
+fig.update_layout(
+    height=600, 
+    title='Correlation Matrix - All Numeric Variables',
+    **get_chart_layout()
+)
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -256,40 +328,51 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 4: Box Plots - Beautiful colors
+# CHART 4: Box Plots - EXACT REFERENCE STYLE with orange outliers
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 4: Distribution Comparison (Box Plots)</p>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
+def create_boxplot(data, y_col, title, y_title):
+    """Create a box plot with EXACT reference styling"""
+    fig = go.Figure()
+    
+    for status in ['Not Accepted', 'Accepted']:
+        subset = data[data['Loan_Status'] == status]
+        fig.add_trace(go.Box(
+            y=subset[y_col],
+            name=status,
+            marker=dict(
+                color=OUTLIER_COLOR,  # Orange outliers
+                size=4,
+                outliercolor=OUTLIER_COLOR
+            ),
+            line=dict(color='#FFFFFF', width=1.5),  # White lines
+            fillcolor=COLORS[status],  # Fill color
+            boxmean=False
+        ))
+    
+    fig.update_layout(
+        height=400,
+        title=title,
+        yaxis_title=y_title,
+        showlegend=False,
+        **get_chart_layout()
+    )
+    
+    return fig
+
 with col1:
-    fig = px.box(df_f, x='Loan_Status', y='Income', color='Loan_Status',
-                 color_discrete_map=COLORS, title='Income Distribution')
-    fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
-    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
-                     line=dict(color='#FAFAFA', width=1))
+    fig = create_boxplot(df_f, 'Income', 'Income Distribution', 'Income ($K)')
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = px.box(df_f, x='Loan_Status', y='CCAvg', color='Loan_Status',
-                 color_discrete_map=COLORS, title='CC Average Distribution')
-    fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', title='CC Avg ($K/month)')
-    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
-                     line=dict(color='#FAFAFA', width=1))
+    fig = create_boxplot(df_f, 'CCAvg', 'CC Average Distribution', 'CC Avg ($K/month)')
     st.plotly_chart(fig, use_container_width=True)
 
 with col3:
-    fig = px.box(df_f, x='Loan_Status', y='Mortgage', color='Loan_Status',
-                 color_discrete_map=COLORS, title='Mortgage Distribution')
-    fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', title='Mortgage ($K)')
-    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
-                     line=dict(color='#FAFAFA', width=1))
+    fig = create_boxplot(df_f, 'Mortgage', 'Mortgage Distribution', 'Mortgage ($K)')
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("""
@@ -298,5 +381,57 @@ st.markdown("""
     <p><strong>Finding:</strong> Box plots reveal significant separation in <strong>Income</strong> and <strong>CCAvg</strong> 
     distributions between accepters and non-accepters. Mortgage shows similar distribution for both groups.</p>
     <p><strong>Implication:</strong> Income and CC spending are strong differentiators; mortgage status is not predictive of loan acceptance.</p>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+
+# =============================================================================
+# CHART 5: Income by Education - EXACT REFERENCE GROUPED BOX PLOT
+# =============================================================================
+st.markdown('<p class="section-header">📊 Chart 5: Income Distribution by Education Level and Loan Status</p>', unsafe_allow_html=True)
+
+fig = go.Figure()
+
+for status in ['Not Accepted', 'Accepted']:
+    subset = df_f[df_f['Loan_Status'] == status]
+    fig.add_trace(go.Box(
+        x=subset['Education_Label'],
+        y=subset['Income'],
+        name=status,
+        marker=dict(
+            color=OUTLIER_COLOR,
+            size=4,
+            outliercolor=OUTLIER_COLOR
+        ),
+        line=dict(color='#FFFFFF', width=1.5),
+        fillcolor=COLORS[status]
+    ))
+
+fig.update_layout(
+    height=500,
+    title='Income Distribution by Education Level and Loan Status',
+    yaxis_title='Income ($K)',
+    xaxis_title='Education_Label',
+    boxmode='group',
+    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'),
+    xaxis=dict(
+        categoryorder='array',
+        categoryarray=['Undergraduate', 'Graduate', 'Advanced']
+    ),
+    **get_chart_layout()
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+edu_rates = df_f.groupby('Education_Label')['Personal_Loan'].mean() * 100
+best_edu = edu_rates.idxmax()
+
+st.markdown(f"""
+<div class="insight-box">
+    <h4>📌 Key Insight</h4>
+    <p><strong>Finding:</strong> <strong>{best_edu}</strong> degree holders show the highest acceptance rate 
+    (<strong>{edu_rates[best_edu]:.1f}%</strong>). Higher education correlates with both higher income and loan acceptance.</p>
+    <p><strong>Implication:</strong> Education level is a strong predictor. Prioritize marketing to advanced degree holders.</p>
 </div>
 """, unsafe_allow_html=True)
