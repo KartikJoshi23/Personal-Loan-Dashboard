@@ -12,184 +12,187 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS with FIXED KPI Cards + Hide/Rename "app" in sidebar
-st.markdown("""
-<style>
-    /* Import Google Font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Main background */
-    .stApp {
-        background-color: #0E1117;
-    }
-    
-    /* ============================================= */
-    /* RENAME "app" to "Overview" in sidebar        */
-    /* ============================================= */
-    
-    [data-testid="stSidebarNav"] li:first-child a span {
-        visibility: hidden;
-    }
-    
-    [data-testid="stSidebarNav"] li:first-child a span::before {
-        content: "📊 Overview";
-        visibility: visible;
-    }
-    
-    [data-testid="stSidebarNav"] li:first-child a {
-        pointer-events: auto;
-    }
-    
-    /* Headers */
-    h1, h2, h3 {
-        color: #FAFAFA !important;
-        font-weight: 700 !important;
-    }
-    
-    /* ============================================= */
-    /* FIXED KPI CARDS - Uniform Size, No Overlap   */
-    /* ============================================= */
-    
-    .kpi-row {
-        display: grid;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-    
-    .kpi-row-4 {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .kpi-row-3 {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .kpi-card {
-        background: linear-gradient(135deg, #1E2130 0%, #2D3348 100%);
-        border: 1px solid #3D4663;
-        border-radius: 16px;
-        padding: 30px 20px;
-        text-align: center;
-        min-height: 160px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .kpi-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(108, 99, 255, 0.2);
-    }
-    
-    .kpi-label {
-        font-size: 0.8rem;
-        color: #A0AEC0;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 15px;
-        font-weight: 500;
-        line-height: 1.4;
-    }
-    
-    .kpi-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #6C63FF;
-        line-height: 1;
-    }
-    
-    /* Responsive KPI cards */
-    @media (max-width: 1200px) {
-        .kpi-row-4 {
-            grid-template-columns: repeat(2, 1fr);
+# Shared CSS - includes sidebar fix
+def load_css():
+    st.markdown("""
+    <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
         }
+        
+        /* Main background */
+        .stApp {
+            background-color: #0E1117;
+        }
+        
+        /* ============================================= */
+        /* RENAME "app" to "Overview" in sidebar        */
+        /* This CSS ensures it works on ALL pages       */
+        /* ============================================= */
+        
+        [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
+            display: none;
+        }
+        
+        [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
+            content: "📊 Overview";
+            display: block;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        
+        /* Headers */
+        h1, h2, h3 {
+            color: #FAFAFA !important;
+            font-weight: 700 !important;
+        }
+        
+        /* ============================================= */
+        /* FIXED KPI CARDS - Uniform Size, No Overlap   */
+        /* ============================================= */
+        
+        .kpi-row {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-row-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
         .kpi-row-3 {
             grid-template-columns: repeat(3, 1fr);
         }
-    }
-    
-    @media (max-width: 768px) {
-        .kpi-row-4, .kpi-row-3 {
-            grid-template-columns: 1fr;
+        
+        .kpi-card {
+            background: linear-gradient(135deg, #1E2130 0%, #2D3348 100%);
+            border: 1px solid #3D4663;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.2);
+        }
+        
+        .kpi-label {
+            font-size: 0.8rem;
+            color: #A0AEC0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
         .kpi-value {
-            font-size: 2rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6C63FF;
+            line-height: 1;
         }
-    }
-    
-    /* ============================================= */
-    /* Insight Box - FIXED                          */
-    /* ============================================= */
-    
-    .insight-box {
-        background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #6C63FF;
-        border-left: 4px solid #6C63FF;
-        padding: 25px 30px;
-        border-radius: 12px;
-        margin: 25px 0;
-    }
-    
-    .insight-box h4 {
-        color: #6C63FF !important;
-        font-size: 1.1rem;
-        margin: 0 0 15px 0 !important;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .insight-box p {
-        color: #E2E8F0 !important;
-        font-size: 0.95rem;
-        line-height: 1.7;
-        margin: 8px 0 !important;
-    }
-    
-    .insight-box strong {
-        color: #FAFAFA !important;
-    }
-    
-    /* Section Headers */
-    .section-header {
-        color: #FAFAFA;
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 30px 0 20px 0;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #3D4663;
-    }
-    
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
-        border-right: 1px solid #3D4663;
-    }
-    
-    section[data-testid="stSidebar"] .stMarkdown {
-        color: #FAFAFA;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: #1E2130 !important;
-        border: 1px solid #3D4663 !important;
-        border-radius: 10px !important;
-        color: #FAFAFA !important;
-    }
-    
-    /* DataFrame */
-    .dataframe {
-        background: #1E2130 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+        
+        /* Responsive KPI cards */
+        @media (max-width: 1200px) {
+            .kpi-row-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .kpi-row-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-row-4, .kpi-row-3 {
+                grid-template-columns: 1fr;
+            }
+            .kpi-value {
+                font-size: 2rem;
+            }
+        }
+        
+        /* ============================================= */
+        /* Insight Box                                  */
+        /* ============================================= */
+        
+        .insight-box {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+            border: 1px solid #6C63FF;
+            border-left: 4px solid #6C63FF;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+        
+        .insight-box h4 {
+            color: #6C63FF !important;
+            font-size: 1.1rem;
+            margin: 0 0 15px 0 !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .insight-box p {
+            color: #E2E8F0 !important;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin: 8px 0 !important;
+        }
+        
+        .insight-box strong {
+            color: #FAFAFA !important;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            color: #FAFAFA;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3D4663;
+        }
+        
+        /* Sidebar */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
+            border-right: 1px solid #3D4663;
+        }
+        
+        section[data-testid="stSidebar"] .stMarkdown {
+            color: #FAFAFA;
+        }
+        
+        /* Expander */
+        .streamlit-expanderHeader {
+            background: #1E2130 !important;
+            border: 1px solid #3D4663 !important;
+            border-radius: 10px !important;
+            color: #FAFAFA !important;
+        }
+        
+        /* DataFrame */
+        .dataframe {
+            background: #1E2130 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Load CSS
+load_css()
 
 # Load data
 @st.cache_data
@@ -332,12 +335,10 @@ st.markdown("""
 
 st.markdown("---")
 
-# ==========================================
-# KPI CARDS - FIXED UNIFORM LAYOUT (GRID)
-# ==========================================
+# KPI CARDS
 st.markdown('<p class="section-header">📊 Key Performance Indicators</p>', unsafe_allow_html=True)
 
-# KPI Row 1 - 4 cards using CSS Grid
+# KPI Row 1 - 4 cards
 st.markdown(f"""
 <div class="kpi-row kpi-row-4">
     <div class="kpi-card">
@@ -359,7 +360,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# KPI Row 2 - 3 cards using CSS Grid
+# KPI Row 2 - 3 cards
 st.markdown(f"""
 <div class="kpi-row kpi-row-3">
     <div class="kpi-card">
@@ -412,7 +413,6 @@ st.markdown("---")
 # Quick Charts
 st.markdown('<p class="section-header">📈 Quick Overview Charts</p>', unsafe_allow_html=True)
 
-# Chart template for dark theme
 chart_template = dict(
     paper_bgcolor='rgba(0,0,0,0)',
     plot_bgcolor='rgba(0,0,0,0)',
@@ -423,7 +423,6 @@ chart_template = dict(
 col1, col2 = st.columns(2)
 
 with col1:
-    # Acceptance by Education
     edu_stats = df_filtered.groupby('Education').agg({
         'Personal_Loan': ['sum', 'count']
     }).reset_index()
@@ -439,19 +438,12 @@ with col1:
         text='Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(
-        height=400,
-        showlegend=False,
-        yaxis_title='Acceptance Rate (%)',
-        xaxis_title='',
-        **chart_template
-    )
+    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='', **chart_template)
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    # Acceptance by Family Size
     fam_stats = df_filtered.groupby('Family').agg({
         'Personal_Loan': ['sum', 'count']
     }).reset_index()
@@ -466,22 +458,14 @@ with col2:
         text='Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(
-        height=400,
-        showlegend=False,
-        yaxis_title='Acceptance Rate (%)',
-        xaxis_title='Family Size',
-        **chart_template
-    )
+    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='Family Size', **chart_template)
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     st.plotly_chart(fig, use_container_width=True)
 
-# Second row of charts
 col1, col2 = st.columns(2)
 
 with col1:
-    # Loan Status Distribution (Pie)
     loan_dist = df_filtered['Personal_Loan'].value_counts().reset_index()
     loan_dist.columns = ['Status', 'Count']
     loan_dist['Status'] = loan_dist['Status'].map({0: 'Not Accepted', 1: 'Accepted'})
@@ -492,15 +476,10 @@ with col1:
         color_discrete_sequence=['#3D4663', '#6C63FF'],
         hole=0.4
     )
-    fig.update_layout(
-        height=400,
-        **chart_template,
-        legend=dict(font=dict(color='#FAFAFA'))
-    )
+    fig.update_layout(height=400, **chart_template, legend=dict(font=dict(color='#FAFAFA')))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    # CD Account Impact
     cd_impact = df_filtered.groupby('CD_Account')['Personal_Loan'].mean() * 100
     cd_df = pd.DataFrame({
         'CD Account': ['No', 'Yes'],
@@ -515,12 +494,7 @@ with col2:
         text='Acceptance Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(
-        height=400,
-        showlegend=False,
-        yaxis_title='Acceptance Rate (%)',
-        **chart_template
-    )
+    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', **chart_template)
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     st.plotly_chart(fig, use_container_width=True)
