@@ -5,11 +5,34 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.set_page_config(page_title="Detailed Analysis", page_icon="📈", layout="wide")
+# Page config - SAME TITLE FOR BROWSER TAB
+st.set_page_config(
+    page_title="Universal Bank - Loan Analytics",
+    page_icon="🏦",
+    layout="wide"
+)
 
-# Dark theme CSS
+# SHARED CSS - Must be on every page
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', sans-serif; }
+    .stApp { background-color: #0E1117; }
+    
+    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
+    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
+        display: none;
+    }
+    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
+        content: "📊 Overview";
+        display: block;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    
+    h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
+    
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
         border: 1px solid #6C63FF;
@@ -18,20 +41,10 @@ st.markdown("""
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 {
-        color: #6C63FF !important;
-        font-size: 1.1rem;
-        margin: 0 0 15px 0 !important;
-    }
-    .insight-box p {
-        color: #E2E8F0 !important;
-        font-size: 0.95rem;
-        line-height: 1.7;
-        margin: 8px 0 !important;
-    }
-    .insight-box strong {
-        color: #FAFAFA !important;
-    }
+    .insight-box h4 { color: #6C63FF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
+    .insight-box strong { color: #FAFAFA !important; }
+    
     .section-header {
         color: #FAFAFA;
         font-size: 1.3rem;
@@ -39,6 +52,11 @@ st.markdown("""
         margin: 30px 0 20px 0;
         padding-bottom: 10px;
         border-bottom: 2px solid #3D4663;
+    }
+    
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
+        border-right: 1px solid #3D4663;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -82,28 +100,38 @@ def load_data():
 df = load_data()
 df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
 
-# Sidebar filters
-st.sidebar.header("🔧 Filters")
+# Sidebar
+with st.sidebar:
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 3rem;">🏦</div>
+        <h2 style="color: #FAFAFA; margin: 10px 0;">Universal Bank</h2>
+        <p style="color: #A0AEC0; font-size: 0.9rem;">Personal Loan Analytics</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### 🔧 Filters")
 
-income_range = st.sidebar.slider(
-    "Income Range ($K)",
-    int(df['Income'].min()), int(df['Income'].max()),
-    (int(df['Income'].min()), int(df['Income'].max()))
-)
+    income_range = st.slider(
+        "Income Range ($K)",
+        int(df['Income'].min()), int(df['Income'].max()),
+        (int(df['Income'].min()), int(df['Income'].max()))
+    )
 
-edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
-selected_edu = st.sidebar.multiselect(
-    "Education Level",
-    options=[1, 2, 3],
-    default=[1, 2, 3],
-    format_func=lambda x: edu_map[x]
-)
+    edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
+    selected_edu = st.multiselect(
+        "Education Level",
+        options=[1, 2, 3],
+        default=[1, 2, 3],
+        format_func=lambda x: edu_map[x]
+    )
 
-selected_family = st.sidebar.multiselect(
-    "Family Size",
-    options=sorted(df['Family'].unique()),
-    default=list(df['Family'].unique())
-)
+    selected_family = st.multiselect(
+        "Family Size",
+        options=sorted(df['Family'].unique()),
+        default=list(df['Family'].unique())
+    )
 
 # Apply filters
 df_f = df[
@@ -111,12 +139,11 @@ df_f = df[
     (df['Education'].isin(selected_edu)) &
     (df['Family'].isin(selected_family))
 ]
-st.sidebar.metric("Records", f"{len(df_f):,}")
 
-# Colors
+st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
+
+# Colors and template
 colors = {'Not Accepted': '#3D4663', 'Accepted': '#6C63FF'}
-
-# Chart template for dark theme
 chart_template = dict(
     paper_bgcolor='rgba(0,0,0,0)',
     plot_bgcolor='rgba(0,0,0,0)',
@@ -149,8 +176,8 @@ fig.update_layout(
     legend=dict(orientation='h', y=1.12, x=0.5, xanchor='center'),
     **chart_template
 )
-fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663', title_font=dict(color='#A0AEC0'))
-fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663', title_font=dict(color='#A0AEC0'))
+fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
+fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
 fig.update_xaxes(title_text='Income ($K)', row=1, col=1)
 fig.update_xaxes(title_text='Age (Years)', row=1, col=2)
 fig.update_yaxes(title_text='Count', row=1, col=1)
@@ -225,11 +252,7 @@ fig = go.Figure(data=go.Heatmap(
     textfont={'size': 9, 'color': '#FAFAFA'}
 ))
 
-fig.update_layout(
-    height=600,
-    title='Correlation Matrix - All Numeric Variables',
-    **chart_template
-)
+fig.update_layout(height=600, title='Correlation Matrix - All Numeric Variables', **chart_template)
 
 st.plotly_chart(fig, use_container_width=True)
 
