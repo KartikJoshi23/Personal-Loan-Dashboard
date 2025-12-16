@@ -5,43 +5,25 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# Page config - SAME TITLE FOR BROWSER TAB
-st.set_page_config(
-    page_title="Universal Bank - Loan Analytics",
-    page_icon="🏦",
-    layout="wide"
-)
+st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# SHARED CSS - Must be on every page
+# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
     * { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #0E1117; }
-    
-    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
-    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
-        display: none;
-    }
-    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
-        content: "📊 Overview";
-        display: block;
-        margin-left: 10px;
-        font-size: 14px;
-    }
-    
     h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #6C63FF;
-        border-left: 4px solid #6C63FF;
+        border: 1px solid #8B7FFF;
+        border-left: 4px solid #8B7FFF;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #6C63FF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -60,6 +42,19 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Colors - Updated beautiful scheme
+COLORS = {'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'}
+COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+
+chart_template = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#FAFAFA', family='Inter'),
+    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+    legend=dict(font=dict(color='#FAFAFA')),
+    colorway=COLOR_SEQUENCE
+)
 
 # Load data
 @st.cache_data
@@ -113,25 +108,15 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🔧 Filters")
 
-    income_range = st.slider(
-        "Income Range ($K)",
-        int(df['Income'].min()), int(df['Income'].max()),
-        (int(df['Income'].min()), int(df['Income'].max()))
-    )
-
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
+                            (int(df['Income'].min()), int(df['Income'].max())))
+    
     edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
-    selected_edu = st.multiselect(
-        "Education Level",
-        options=[1, 2, 3],
-        default=[1, 2, 3],
-        format_func=lambda x: edu_map[x]
-    )
-
-    selected_family = st.multiselect(
-        "Family Size",
-        options=sorted(df['Family'].unique()),
-        default=list(df['Family'].unique())
-    )
+    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3],
+                                  format_func=lambda x: edu_map[x])
+    
+    selected_family = st.multiselect("Family Size", options=sorted(df['Family'].unique()),
+                                     default=list(df['Family'].unique()))
 
 # Apply filters
 df_f = df[
@@ -141,15 +126,6 @@ df_f = df[
 ]
 
 st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
-
-# Colors and template
-colors = {'Not Accepted': '#3D4663', 'Accepted': '#6C63FF'}
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA'),
-    title_font=dict(size=16, color='#FAFAFA')
-)
 
 # Header
 st.markdown("""
@@ -166,18 +142,19 @@ st.markdown('<p class="section-header">📊 Chart 1: Income & Age Distributions 
 
 fig = make_subplots(rows=1, cols=2, subplot_titles=('Income Distribution', 'Age Distribution'))
 
-for status, color in colors.items():
+for status, color in COLORS.items():
     subset = df_f[df_f['Loan_Status'] == status]
-    fig.add_trace(go.Histogram(x=subset['Income'], name=status, marker_color=color, opacity=0.7), row=1, col=1)
-    fig.add_trace(go.Histogram(x=subset['Age'], name=status, marker_color=color, opacity=0.7, showlegend=False), row=1, col=2)
+    fig.add_trace(go.Histogram(x=subset['Income'], name=status, marker_color=color, opacity=0.75), row=1, col=1)
+    fig.add_trace(go.Histogram(x=subset['Age'], name=status, marker_color=color, opacity=0.75, showlegend=False), row=1, col=2)
 
 fig.update_layout(
     barmode='overlay', height=450,
-    legend=dict(orientation='h', y=1.12, x=0.5, xanchor='center'),
+    legend=dict(orientation='h', y=1.15, x=0.5, xanchor='center'),
     **chart_template
 )
-fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
-fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
+fig.update_annotations(font=dict(color='#FAFAFA', size=14))
+fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title_font=dict(color='#A0AEC0'))
+fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title_font=dict(color='#A0AEC0'))
 fig.update_xaxes(title_text='Income ($K)', row=1, col=1)
 fig.update_xaxes(title_text='Age (Years)', row=1, col=2)
 fig.update_yaxes(title_text='Count', row=1, col=1)
@@ -205,14 +182,14 @@ st.markdown('<p class="section-header">📊 Chart 2: Credit Card Spending vs Inc
 
 fig = px.scatter(
     df_f, x='Income', y='CCAvg', color='Loan_Status',
-    color_discrete_map=colors, opacity=0.6,
+    color_discrete_map=COLORS, opacity=0.6,
     title='Credit Card Average Spending vs Income by Loan Status'
 )
 fig.update_layout(height=500, **chart_template)
 fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663', title='Income ($K)')
-fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663', title='CC Avg Spending ($K/month)')
-fig.update_traces(marker=dict(size=7))
+fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title='Income ($K)')
+fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', title='CC Avg Spending ($K/month)')
+fig.update_traces(marker=dict(size=8, line=dict(width=0.5, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -241,11 +218,18 @@ num_cols = [c for c in num_cols if c in df_f.columns]
 
 corr = df_f[num_cols].corr()
 
+# Beautiful purple-orange diverging colorscale
 fig = go.Figure(data=go.Heatmap(
     z=corr.values,
     x=corr.columns,
     y=corr.columns,
-    colorscale='RdBu_r',
+    colorscale=[
+        [0.0, '#FC8181'],   # Red for negative
+        [0.25, '#F6AD55'],  # Orange
+        [0.5, '#1E2130'],   # Dark center
+        [0.75, '#63B3ED'],  # Blue
+        [1.0, '#8B7FFF']    # Purple for positive
+    ],
     zmid=0,
     text=np.round(corr.values, 2),
     texttemplate='%{text}',
@@ -272,7 +256,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 4: Box Plots
+# CHART 4: Box Plots - Beautiful colors
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 4: Distribution Comparison (Box Plots)</p>', unsafe_allow_html=True)
 
@@ -280,26 +264,32 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     fig = px.box(df_f, x='Loan_Status', y='Income', color='Loan_Status',
-                 color_discrete_map=colors, title='Income Distribution')
+                 color_discrete_map=COLORS, title='Income Distribution')
     fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', title='Income ($K)')
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
+    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
+                     line=dict(color='#FAFAFA', width=1))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     fig = px.box(df_f, x='Loan_Status', y='CCAvg', color='Loan_Status',
-                 color_discrete_map=colors, title='CC Average Distribution')
+                 color_discrete_map=COLORS, title='CC Average Distribution')
     fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', title='CC Avg ($K/month)')
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', title='CC Avg ($K/month)')
+    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
+                     line=dict(color='#FAFAFA', width=1))
     st.plotly_chart(fig, use_container_width=True)
 
 with col3:
     fig = px.box(df_f, x='Loan_Status', y='Mortgage', color='Loan_Status',
-                 color_discrete_map=colors, title='Mortgage Distribution')
+                 color_discrete_map=COLORS, title='Mortgage Distribution')
     fig.update_layout(height=400, showlegend=False, **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', title='Mortgage ($K)')
+    fig.update_xaxes(gridcolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', title='Mortgage ($K)')
+    fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
+                     line=dict(color='#FAFAFA', width=1))
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("""
