@@ -12,200 +12,116 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Shared CSS - includes sidebar fix
-def load_css():
-    st.markdown("""
-    <style>
-        /* Import Google Font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        /* Main background */
-        .stApp {
-            background-color: #0E1117;
-        }
-        
-        /* ============================================= */
-        /* RENAME "app" to "Overview" in sidebar        */
-        /* This CSS ensures it works on ALL pages       */
-        /* ============================================= */
-        
-        [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
-            display: none;
-        }
-        
-        [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
-            content: "📊 Overview";
-            display: block;
-            margin-left: 10px;
-            font-size: 14px;
-        }
-        
-        /* Headers */
-        h1, h2, h3 {
-            color: #FAFAFA !important;
-            font-weight: 700 !important;
-        }
-        
-        /* ============================================= */
-        /* FIXED KPI CARDS - Uniform Size, No Overlap   */
-        /* ============================================= */
-        
-        .kpi-row {
-            display: grid;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .kpi-row-4 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        
-        .kpi-row-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        
-        .kpi-card {
-            background: linear-gradient(135deg, #1E2130 0%, #2D3348 100%);
-            border: 1px solid #3D4663;
-            border-radius: 16px;
-            padding: 30px 20px;
-            text-align: center;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.2);
-        }
-        
-        .kpi-label {
-            font-size: 0.8rem;
-            color: #A0AEC0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-        
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #6C63FF;
-            line-height: 1;
-        }
-        
-        /* Responsive KPI cards */
-        @media (max-width: 1200px) {
-            .kpi-row-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .kpi-row-3 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .kpi-row-4, .kpi-row-3 {
-                grid-template-columns: 1fr;
-            }
-            .kpi-value {
-                font-size: 2rem;
-            }
-        }
-        
-        /* ============================================= */
-        /* Insight Box                                  */
-        /* ============================================= */
-        
-        .insight-box {
-            background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-            border: 1px solid #6C63FF;
-            border-left: 4px solid #6C63FF;
-            padding: 25px 30px;
-            border-radius: 12px;
-            margin: 25px 0;
-        }
-        
-        .insight-box h4 {
-            color: #6C63FF !important;
-            font-size: 1.1rem;
-            margin: 0 0 15px 0 !important;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .insight-box p {
-            color: #E2E8F0 !important;
-            font-size: 0.95rem;
-            line-height: 1.7;
-            margin: 8px 0 !important;
-        }
-        
-        .insight-box strong {
-            color: #FAFAFA !important;
-        }
-        
-        /* Section Headers */
-        .section-header {
-            color: #FAFAFA;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 30px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3D4663;
-        }
-        
-        /* Sidebar */
-        section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
-            border-right: 1px solid #3D4663;
-        }
-        
-        section[data-testid="stSidebar"] .stMarkdown {
-            color: #FAFAFA;
-        }
-        
-        /* Expander */
-        .streamlit-expanderHeader {
-            background: #1E2130 !important;
-            border: 1px solid #3D4663 !important;
-            border-radius: 10px !important;
-            color: #FAFAFA !important;
-        }
-        
-        /* DataFrame */
-        .dataframe {
-            background: #1E2130 !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+# Dark theme CSS
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', sans-serif; }
+    .stApp { background-color: #0E1117; }
+    
+    h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
+    
+    .kpi-row {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .kpi-row-4 { grid-template-columns: repeat(4, 1fr); }
+    .kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
+    
+    .kpi-card {
+        background: linear-gradient(135deg, #1E2130 0%, #2D3348 100%);
+        border: 1px solid #3D4663;
+        border-radius: 16px;
+        padding: 30px 20px;
+        text-align: center;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px rgba(139, 127, 255, 0.2);
+    }
+    .kpi-label {
+        font-size: 0.8rem;
+        color: #A0AEC0;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 15px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #8B7FFF;
+        line-height: 1;
+    }
+    
+    @media (max-width: 1200px) {
+        .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .kpi-row-4, .kpi-row-3 { grid-template-columns: 1fr; }
+        .kpi-value { font-size: 2rem; }
+    }
+    
+    .insight-box {
+        background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+        border: 1px solid #8B7FFF;
+        border-left: 4px solid #8B7FFF;
+        padding: 25px 30px;
+        border-radius: 12px;
+        margin: 25px 0;
+    }
+    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
+    .insight-box strong { color: #FAFAFA !important; }
+    
+    .section-header {
+        color: #FAFAFA;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3D4663;
+    }
+    
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
+        border-right: 1px solid #3D4663;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# Load CSS
-load_css()
+# Color scheme for charts
+COLORS = {
+    'Not Accepted': '#636B7C',
+    'Accepted': '#8B7FFF'
+}
+COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+
+# Chart template
+chart_template = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#FAFAFA', family='Inter'),
+    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+    legend=dict(font=dict(color='#FAFAFA')),
+    colorway=COLOR_SEQUENCE
+)
 
 # Load data
 @st.cache_data
 def load_data():
-    """Load the Universal Bank dataset."""
     try:
-        paths = [
-            "UniversalBank.xlsx",
-            "data/UniversalBank.xlsx",
-            "UniversalBank with description.xls",
-            "data/UniversalBank with description.xls"
-        ]
-        
+        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx",
+                "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
         for path in paths:
             try:
                 df = pd.read_excel(path, sheet_name="Data")
@@ -215,16 +131,13 @@ def load_data():
                 return df
             except:
                 continue
-        
         return create_sample_data()
     except:
         return create_sample_data()
 
 def create_sample_data():
-    """Create sample data for demonstration."""
     np.random.seed(42)
     n = 5000
-    
     df = pd.DataFrame({
         'ID': range(1, n + 1),
         'Age': np.random.randint(23, 67, n),
@@ -234,25 +147,17 @@ def create_sample_data():
         'Family': np.random.choice([1, 2, 3, 4], n, p=[0.25, 0.35, 0.25, 0.15]),
         'CCAvg': np.round(np.clip(np.random.exponential(1.9, n), 0, 10), 1),
         'Education': np.random.choice([1, 2, 3], n, p=[0.35, 0.40, 0.25]),
-        'Mortgage': np.where(np.random.random(n) > 0.5, 
-                            np.random.exponential(100, n).astype(int), 0),
+        'Mortgage': np.where(np.random.random(n) > 0.5, np.random.exponential(100, n).astype(int), 0),
         'Securities_Account': np.random.choice([0, 1], n, p=[0.90, 0.10]),
         'CD_Account': np.random.choice([0, 1], n, p=[0.94, 0.06]),
         'Online': np.random.choice([0, 1], n, p=[0.40, 0.60]),
         'CreditCard': np.random.choice([0, 1], n, p=[0.71, 0.29])
     })
-    
-    prob = (0.02 + 
-            0.12 * (df['Income'] > 100).astype(int) +
-            0.08 * (df['Income'] > 150).astype(int) +
-            0.08 * (df['Education'] == 3).astype(int) +
-            0.25 * (df['CD_Account'] == 1).astype(int) +
-            0.04 * (df['CCAvg'] > 3).astype(int))
-    
+    prob = (0.02 + 0.12*(df['Income']>100) + 0.08*(df['Income']>150) + 
+            0.08*(df['Education']==3) + 0.25*(df['CD_Account']==1) + 0.04*(df['CCAvg']>3))
     df['Personal_Loan'] = (np.random.random(n) < prob).astype(int)
     return df
 
-# Load data
 df = load_data()
 
 # Sidebar
@@ -266,34 +171,19 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("---")
-    
-    # Filters
     st.markdown("### 🔧 Filters")
     
     edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced/Professional'}
-    selected_edu = st.multiselect(
-        "Education Level",
-        options=[1, 2, 3],
-        default=[1, 2, 3],
-        format_func=lambda x: edu_map[x]
-    )
+    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3],
+                                  format_func=lambda x: edu_map[x])
     
-    income_range = st.slider(
-        "Income Range ($K)",
-        min_value=int(df['Income'].min()),
-        max_value=int(df['Income'].max()),
-        value=(int(df['Income'].min()), int(df['Income'].max()))
-    )
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
+                            (int(df['Income'].min()), int(df['Income'].max())))
     
-    selected_family = st.multiselect(
-        "Family Size",
-        options=sorted(df['Family'].unique()),
-        default=list(df['Family'].unique())
-    )
+    selected_family = st.multiselect("Family Size", options=sorted(df['Family'].unique()),
+                                     default=list(df['Family'].unique()))
     
     st.markdown("---")
-    
-    # Dataset info
     with st.expander("📋 Dataset Info"):
         st.markdown("""
         **Columns:**
@@ -302,8 +192,6 @@ with st.sidebar:
         - `CCAvg` - CC spend ($K/month)
         - `Education` - 1=UG, 2=Grad, 3=Adv
         - `Personal_Loan` - Target (0/1)
-        - `CD_Account` - Has CD account
-        - `Securities_Account` - Has securities
         """)
 
 # Apply filters
@@ -338,7 +226,6 @@ st.markdown("---")
 # KPI CARDS
 st.markdown('<p class="section-header">📊 Key Performance Indicators</p>', unsafe_allow_html=True)
 
-# KPI Row 1 - 4 cards
 st.markdown(f"""
 <div class="kpi-row kpi-row-4">
     <div class="kpi-card">
@@ -360,7 +247,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# KPI Row 2 - 3 cards
 st.markdown(f"""
 <div class="kpi-row kpi-row-3">
     <div class="kpi-card">
@@ -378,21 +264,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# KPI Definitions
-with st.expander("📋 KPI Definitions & Formulas"):
-    st.markdown("""
-    | KPI | Formula | Interpretation |
-    |-----|---------|----------------|
-    | **Total Customers** | `COUNT(*)` | Total customers in filtered dataset |
-    | **Loan Accepters** | `SUM(Personal_Loan)` | Customers who accepted the loan |
-    | **Acceptance Rate** | `SUM(Personal_Loan) / COUNT(*) × 100` | Campaign conversion rate |
-    | **Avg Income (Accepters)** | `AVG(Income) WHERE Personal_Loan=1` | Income profile of accepters |
-    | **Avg CC Spend** | `AVG(CCAvg) WHERE Personal_Loan=1` | Spending profile of accepters |
-    | **CD Penetration** | `SUM(CD_Account WHERE Loan=1) / COUNT(Accepters) × 100` | CD ownership among accepters |
-    | **Securities Penetration** | `SUM(Securities WHERE Loan=1) / COUNT(Accepters) × 100` | Securities ownership |
-    """)
-
-# Key Insight Box
+# Insight Box
 income_diff = avg_income_accepters - avg_income_non
 cd_overall = df_filtered['CD_Account'].mean() * 100
 cd_lift = cd_penetration / cd_overall if cd_overall > 0 else 0
@@ -413,19 +285,11 @@ st.markdown("---")
 # Quick Charts
 st.markdown('<p class="section-header">📈 Quick Overview Charts</p>', unsafe_allow_html=True)
 
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA'),
-    title_font=dict(size=16, color='#FAFAFA')
-)
-
 col1, col2 = st.columns(2)
 
 with col1:
-    edu_stats = df_filtered.groupby('Education').agg({
-        'Personal_Loan': ['sum', 'count']
-    }).reset_index()
+    # Acceptance by Education - Using gradient colors
+    edu_stats = df_filtered.groupby('Education').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
     edu_stats.columns = ['Education', 'Accepted', 'Total']
     edu_stats['Rate'] = edu_stats['Accepted'] / edu_stats['Total'] * 100
     edu_stats['Education'] = edu_stats['Education'].map(edu_map)
@@ -433,39 +297,39 @@ with col1:
     fig = px.bar(
         edu_stats, x='Education', y='Rate',
         title='📚 Acceptance Rate by Education',
-        color='Rate',
-        color_continuous_scale=['#1E2130', '#6C63FF'],
+        color='Education',
+        color_discrete_sequence=['#8B7FFF', '#F6AD55', '#48BB78'],
         text='Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
     fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='', **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
+    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fam_stats = df_filtered.groupby('Family').agg({
-        'Personal_Loan': ['sum', 'count']
-    }).reset_index()
+    # Acceptance by Family Size - Using gradient colors
+    fam_stats = df_filtered.groupby('Family').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
     fam_stats.columns = ['Family', 'Accepted', 'Total']
     fam_stats['Rate'] = fam_stats['Accepted'] / fam_stats['Total'] * 100
     
     fig = px.bar(
         fam_stats, x='Family', y='Rate',
         title='👨‍👩‍👧‍👦 Acceptance Rate by Family Size',
-        color='Rate',
-        color_continuous_scale=['#1E2130', '#48BB78'],
+        color='Family',
+        color_discrete_sequence=['#4FD1C5', '#63B3ED', '#F687B3', '#FC8181'],
         text='Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
     fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='Family Size', **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
+    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
     st.plotly_chart(fig, use_container_width=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
+    # Pie Chart - Using the reference colors
     loan_dist = df_filtered['Personal_Loan'].value_counts().reset_index()
     loan_dist.columns = ['Status', 'Count']
     loan_dist['Status'] = loan_dist['Status'].map({0: 'Not Accepted', 1: 'Accepted'})
@@ -473,13 +337,17 @@ with col1:
     fig = px.pie(
         loan_dist, values='Count', names='Status',
         title='🎯 Loan Acceptance Distribution',
-        color_discrete_sequence=['#3D4663', '#6C63FF'],
+        color='Status',
+        color_discrete_map={'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'},
         hole=0.4
     )
-    fig.update_layout(height=400, **chart_template, legend=dict(font=dict(color='#FAFAFA')))
+    fig.update_traces(textposition='outside', textinfo='percent+label',
+                     textfont=dict(color='#FAFAFA'))
+    fig.update_layout(height=400, **chart_template)
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
+    # CD Account Impact - Orange gradient like reference
     cd_impact = df_filtered.groupby('CD_Account')['Personal_Loan'].mean() * 100
     cd_df = pd.DataFrame({
         'CD Account': ['No', 'Yes'],
@@ -490,13 +358,13 @@ with col2:
         cd_df, x='CD Account', y='Acceptance Rate',
         title='🏦 CD Account Impact on Loan Acceptance',
         color='Acceptance Rate',
-        color_continuous_scale=['#1E2130', '#F6AD55'],
+        color_continuous_scale=[[0, '#636B7C'], [0.5, '#F6AD55'], [1, '#F6AD55']],
         text='Acceptance Rate'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
     fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', **chart_template)
-    fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
-    fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
+    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
+    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
     st.plotly_chart(fig, use_container_width=True)
 
 # Data Preview
