@@ -47,35 +47,10 @@ st.markdown("""
 # EXACT COLORS FROM REFERENCE
 # ============================================
 COLORS = {
-    'Not Accepted': '#5A5F72',  # Muted gray
-    'Accepted': '#7B68EE'       # Medium purple (exact match)
+    'Not Accepted': '#5A5F72',
+    'Accepted': '#7B68EE'
 }
-OUTLIER_COLOR = '#FFA500'  # Orange for outliers
-
-# Dark theme chart template
-def get_chart_layout():
-    return dict(
-        paper_bgcolor='#0E1117',
-        plot_bgcolor='#0E1117',
-        font=dict(color='#FAFAFA', family='Inter', size=12),
-        title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-        legend=dict(
-            font=dict(color='#FAFAFA', size=11),
-            bgcolor='rgba(0,0,0,0)'
-        ),
-        xaxis=dict(
-            gridcolor='#2D3748',
-            zerolinecolor='#2D3748',
-            tickfont=dict(color='#A0AEC0'),
-            title_font=dict(color='#A0AEC0')
-        ),
-        yaxis=dict(
-            gridcolor='#2D3748',
-            zerolinecolor='#2D3748',
-            tickfont=dict(color='#A0AEC0'),
-            title_font=dict(color='#A0AEC0')
-        )
-    )
+OUTLIER_COLOR = '#FFA500'
 
 # Load data
 @st.cache_data
@@ -158,55 +133,39 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 1: Income & Age Histograms - EXACT REFERENCE STYLE
+# CHART 1: Income & Age Histograms
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 1: Income & Age Distributions by Loan Status</p>', unsafe_allow_html=True)
 
 fig = make_subplots(rows=1, cols=2, subplot_titles=('Income Distribution', 'Age Distribution'))
 
-# Add histograms with EXACT colors
 for status in ['Not Accepted', 'Accepted']:
     subset = df_f[df_f['Loan_Status'] == status]
     color = COLORS[status]
     
     fig.add_trace(
-        go.Histogram(
-            x=subset['Income'], 
-            name=status, 
-            marker_color=color,
-            opacity=0.75,
-            legendgroup=status
-        ), 
+        go.Histogram(x=subset['Income'], name=status, marker_color=color, opacity=0.75, legendgroup=status), 
         row=1, col=1
     )
     fig.add_trace(
-        go.Histogram(
-            x=subset['Age'], 
-            name=status, 
-            marker_color=color,
-            opacity=0.75,
-            showlegend=False,
-            legendgroup=status
-        ), 
+        go.Histogram(x=subset['Age'], name=status, marker_color=color, opacity=0.75, showlegend=False, legendgroup=status), 
         row=1, col=2
     )
 
 fig.update_layout(
     barmode='overlay',
     height=450,
-    legend=dict(
-        orientation='h', 
-        y=1.15, 
-        x=0.5, 
-        xanchor='center',
-        font=dict(color='#FAFAFA')
-    ),
-    **get_chart_layout()
+    legend=dict(orientation='h', y=1.15, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA', family='Inter', size=12)
 )
 fig.update_annotations(font=dict(color='#FAFAFA', size=14))
-fig.update_xaxes(title_text='Income ($K)', row=1, col=1)
-fig.update_xaxes(title_text='Age (Years)', row=1, col=2)
-fig.update_yaxes(title_text='Count', row=1, col=1)
+fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+fig.update_xaxes(title_text='Income ($K)', row=1, col=1, title_font=dict(color='#A0AEC0'))
+fig.update_xaxes(title_text='Age (Years)', row=1, col=2, title_font=dict(color='#A0AEC0'))
+fig.update_yaxes(title_text='Count', row=1, col=1, title_font=dict(color='#A0AEC0'))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -225,13 +184,12 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 2: Scatter Plot - EXACT REFERENCE STYLE
+# CHART 2: Scatter Plot
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 2: Credit Card Spending vs Income</p>', unsafe_allow_html=True)
 
 fig = go.Figure()
 
-# Plot Not Accepted first (so Accepted appears on top)
 for status in ['Not Accepted', 'Accepted']:
     subset = df_f[df_f['Loan_Status'] == status]
     fig.add_trace(go.Scatter(
@@ -239,21 +197,20 @@ for status in ['Not Accepted', 'Accepted']:
         y=subset['CCAvg'],
         mode='markers',
         name=status,
-        marker=dict(
-            color=COLORS[status],
-            size=7,
-            opacity=0.6,
-            line=dict(width=0)
-        )
+        marker=dict(color=COLORS[status], size=7, opacity=0.6)
     ))
 
 fig.update_layout(
     height=500,
-    title='Credit Card Average Spending vs Income by Loan Status',
+    title=dict(text='Credit Card Average Spending vs Income by Loan Status', font=dict(color='#FAFAFA', size=16)),
     xaxis_title='Income ($K)',
     yaxis_title='CC Avg Spending ($K/month)',
-    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'),
-    **get_chart_layout()
+    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -273,7 +230,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 3: Correlation Heatmap - Purple-Orange diverging
+# CHART 3: Correlation Heatmap
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 3: Correlation Heatmap</p>', unsafe_allow_html=True)
 
@@ -283,13 +240,12 @@ num_cols = [c for c in num_cols if c in df_f.columns]
 
 corr = df_f[num_cols].corr()
 
-# Purple-Orange diverging colorscale
 colorscale = [
-    [0.0, '#E74C3C'],   # Red for strong negative
-    [0.25, '#F39C12'],  # Orange for negative
-    [0.5, '#1E2130'],   # Dark neutral
-    [0.75, '#5DADE2'],  # Blue for positive
-    [1.0, '#7B68EE']    # Purple for strong positive
+    [0.0, '#E74C3C'],
+    [0.25, '#F39C12'],
+    [0.5, '#1E2130'],
+    [0.75, '#5DADE2'],
+    [1.0, '#7B68EE']
 ]
 
 fig = go.Figure(data=go.Heatmap(
@@ -306,8 +262,12 @@ fig = go.Figure(data=go.Heatmap(
 
 fig.update_layout(
     height=600, 
-    title='Correlation Matrix - All Numeric Variables',
-    **get_chart_layout()
+    title=dict(text='Correlation Matrix - All Numeric Variables', font=dict(color='#FAFAFA', size=16)),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(tickfont=dict(color='#A0AEC0'))
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -328,51 +288,82 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 4: Box Plots - EXACT REFERENCE STYLE with orange outliers
+# CHART 4: Box Plots - EXACT REFERENCE STYLE
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 4: Distribution Comparison (Box Plots)</p>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
-def create_boxplot(data, y_col, title, y_title):
-    """Create a box plot with EXACT reference styling"""
+with col1:
     fig = go.Figure()
-    
     for status in ['Not Accepted', 'Accepted']:
-        subset = data[data['Loan_Status'] == status]
+        subset = df_f[df_f['Loan_Status'] == status]
         fig.add_trace(go.Box(
-            y=subset[y_col],
+            y=subset['Income'],
             name=status,
-            marker=dict(
-                color=OUTLIER_COLOR,  # Orange outliers
-                size=4,
-                outliercolor=OUTLIER_COLOR
-            ),
-            line=dict(color='#FFFFFF', width=1.5),  # White lines
-            fillcolor=COLORS[status],  # Fill color
-            boxmean=False
+            marker=dict(color=OUTLIER_COLOR, size=4, outliercolor=OUTLIER_COLOR),
+            line=dict(color='#FFFFFF', width=1.5),
+            fillcolor=COLORS[status]
         ))
-    
     fig.update_layout(
         height=400,
-        title=title,
-        yaxis_title=y_title,
+        title=dict(text='Income Distribution', font=dict(color='#FAFAFA', size=14)),
+        yaxis_title='Income ($K)',
         showlegend=False,
-        **get_chart_layout()
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
     )
-    
-    return fig
-
-with col1:
-    fig = create_boxplot(df_f, 'Income', 'Income Distribution', 'Income ($K)')
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = create_boxplot(df_f, 'CCAvg', 'CC Average Distribution', 'CC Avg ($K/month)')
+    fig = go.Figure()
+    for status in ['Not Accepted', 'Accepted']:
+        subset = df_f[df_f['Loan_Status'] == status]
+        fig.add_trace(go.Box(
+            y=subset['CCAvg'],
+            name=status,
+            marker=dict(color=OUTLIER_COLOR, size=4, outliercolor=OUTLIER_COLOR),
+            line=dict(color='#FFFFFF', width=1.5),
+            fillcolor=COLORS[status]
+        ))
+    fig.update_layout(
+        height=400,
+        title=dict(text='CC Average Distribution', font=dict(color='#FAFAFA', size=14)),
+        yaxis_title='CC Avg ($K/month)',
+        showlegend=False,
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 with col3:
-    fig = create_boxplot(df_f, 'Mortgage', 'Mortgage Distribution', 'Mortgage ($K)')
+    fig = go.Figure()
+    for status in ['Not Accepted', 'Accepted']:
+        subset = df_f[df_f['Loan_Status'] == status]
+        fig.add_trace(go.Box(
+            y=subset['Mortgage'],
+            name=status,
+            marker=dict(color=OUTLIER_COLOR, size=4, outliercolor=OUTLIER_COLOR),
+            line=dict(color='#FFFFFF', width=1.5),
+            fillcolor=COLORS[status]
+        ))
+    fig.update_layout(
+        height=400,
+        title=dict(text='Mortgage Distribution', font=dict(color='#FAFAFA', size=14)),
+        yaxis_title='Mortgage ($K)',
+        showlegend=False,
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("""
@@ -387,7 +378,7 @@ st.markdown("""
 st.markdown("---")
 
 # =============================================================================
-# CHART 5: Income by Education - EXACT REFERENCE GROUPED BOX PLOT
+# CHART 5: Income by Education - GROUPED BOX PLOT
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 5: Income Distribution by Education Level and Loan Status</p>', unsafe_allow_html=True)
 
@@ -399,27 +390,23 @@ for status in ['Not Accepted', 'Accepted']:
         x=subset['Education_Label'],
         y=subset['Income'],
         name=status,
-        marker=dict(
-            color=OUTLIER_COLOR,
-            size=4,
-            outliercolor=OUTLIER_COLOR
-        ),
+        marker=dict(color=OUTLIER_COLOR, size=4, outliercolor=OUTLIER_COLOR),
         line=dict(color='#FFFFFF', width=1.5),
         fillcolor=COLORS[status]
     ))
 
 fig.update_layout(
     height=500,
-    title='Income Distribution by Education Level and Loan Status',
+    title=dict(text='Income Distribution by Education Level and Loan Status', font=dict(color='#FAFAFA', size=16)),
     yaxis_title='Income ($K)',
     xaxis_title='Education_Label',
     boxmode='group',
-    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'),
-    xaxis=dict(
-        categoryorder='array',
-        categoryarray=['Undergraduate', 'Graduate', 'Advanced']
-    ),
-    **get_chart_layout()
+    legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+    xaxis=dict(categoryorder='array', categoryarray=['Undergraduate', 'Graduate', 'Advanced'], gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA')
 )
 
 st.plotly_chart(fig, use_container_width=True)
