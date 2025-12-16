@@ -95,17 +95,6 @@ COLORS = {
     'Accepted': '#7B68EE'
 }
 
-def get_chart_layout():
-    return dict(
-        paper_bgcolor='#0E1117',
-        plot_bgcolor='#0E1117',
-        font=dict(color='#FAFAFA', family='Inter', size=12),
-        title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-        legend=dict(font=dict(color='#FAFAFA', size=11), bgcolor='rgba(0,0,0,0)'),
-        xaxis=dict(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'), title_font=dict(color='#A0AEC0')),
-        yaxis=dict(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'), title_font=dict(color='#A0AEC0'))
-    )
-
 # Load data
 @st.cache_data
 def load_data():
@@ -239,7 +228,6 @@ with col1:
     loan_dist = df_filtered['Personal_Loan'].value_counts().reset_index()
     loan_dist.columns = ['Status', 'Count']
     loan_dist['Status'] = loan_dist['Status'].map({0: 'Not Accepted', 1: 'Accepted'})
-    loan_dist['Percent'] = loan_dist['Count'] / loan_dist['Count'].sum() * 100
     
     fig = go.Figure(data=[go.Pie(
         labels=loan_dist['Status'],
@@ -253,9 +241,11 @@ with col1:
     
     fig.update_layout(
         height=400,
-        title='🎯 Loan Acceptance Distribution',
+        title=dict(text='🎯 Loan Acceptance Distribution', font=dict(color='#FAFAFA', size=16)),
         legend=dict(orientation='h', y=-0.1, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
-        **get_chart_layout()
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA')
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -271,7 +261,7 @@ with col2:
     fig.add_trace(go.Bar(
         x=cd_df['CD Account'],
         y=cd_df['Acceptance Rate'],
-        marker_color=['#5A5F72', '#F39C12'],  # Gray and Orange
+        marker_color=['#5A5F72', '#F39C12'],
         text=[f"{v:.1f}%" for v in cd_df['Acceptance Rate']],
         textposition='outside',
         textfont=dict(color='#FAFAFA', size=14)
@@ -279,10 +269,14 @@ with col2:
     
     fig.update_layout(
         height=400,
-        title='🏦 CD Account Impact on Loan Acceptance',
+        title=dict(text='🏦 CD Account Impact on Loan Acceptance', font=dict(color='#FAFAFA', size=16)),
         yaxis_title='Acceptance Rate (%)',
         showlegend=False,
-        **get_chart_layout()
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -299,7 +293,7 @@ with col1:
     fig.add_trace(go.Bar(
         x=edu_stats['Education'],
         y=edu_stats['Rate'],
-        marker_color=['#3498DB', '#9B59B6', '#1ABC9C'],  # Blue, Purple, Teal
+        marker_color=['#3498DB', '#9B59B6', '#1ABC9C'],
         text=[f"{v:.1f}%" for v in edu_stats['Rate']],
         textposition='outside',
         textfont=dict(color='#FAFAFA', size=12)
@@ -307,10 +301,14 @@ with col1:
     
     fig.update_layout(
         height=400,
-        title='📚 Acceptance Rate by Education',
+        title=dict(text='📚 Acceptance Rate by Education', font=dict(color='#FAFAFA', size=16)),
         yaxis_title='Acceptance Rate (%)',
         showlegend=False,
-        **get_chart_layout()
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -324,7 +322,7 @@ with col2:
     fig.add_trace(go.Bar(
         x=fam_stats['Family'],
         y=fam_stats['Rate'],
-        marker_color=['#E74C3C', '#F39C12', '#2ECC71', '#3498DB'],  # Red, Orange, Green, Blue
+        marker_color=['#E74C3C', '#F39C12', '#2ECC71', '#3498DB'],
         text=[f"{v:.1f}%" for v in fam_stats['Rate']],
         textposition='outside',
         textfont=dict(color='#FAFAFA', size=12)
@@ -332,11 +330,15 @@ with col2:
     
     fig.update_layout(
         height=400,
-        title='👨‍👩‍👧‍👦 Acceptance Rate by Family Size',
+        title=dict(text='👨‍👩‍👧‍👦 Acceptance Rate by Family Size', font=dict(color='#FAFAFA', size=16)),
         xaxis_title='Family Size',
         yaxis_title='Acceptance Rate (%)',
         showlegend=False,
-        **get_chart_layout()
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA'),
+        xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
     )
     st.plotly_chart(fig, use_container_width=True)
 
