@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS
+# Dark theme CSS with FIXED KPI Cards + Hide/Rename "app" in sidebar
 st.markdown("""
 <style>
     /* Import Google Font */
@@ -27,19 +27,58 @@ st.markdown("""
         background-color: #0E1117;
     }
     
+    /* ============================================= */
+    /* RENAME "app" to "Overview" in sidebar        */
+    /* ============================================= */
+    
+    [data-testid="stSidebarNav"] li:first-child a span {
+        visibility: hidden;
+    }
+    
+    [data-testid="stSidebarNav"] li:first-child a span::before {
+        content: "📊 Overview";
+        visibility: visible;
+    }
+    
+    [data-testid="stSidebarNav"] li:first-child a {
+        pointer-events: auto;
+    }
+    
     /* Headers */
     h1, h2, h3 {
         color: #FAFAFA !important;
         font-weight: 700 !important;
     }
     
-    /* KPI Cards */
+    /* ============================================= */
+    /* FIXED KPI CARDS - Uniform Size, No Overlap   */
+    /* ============================================= */
+    
+    .kpi-row {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .kpi-row-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .kpi-row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
     .kpi-card {
         background: linear-gradient(135deg, #1E2130 0%, #2D3348 100%);
         border: 1px solid #3D4663;
-        padding: 25px;
         border-radius: 16px;
+        padding: 30px 20px;
         text-align: center;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
@@ -48,28 +87,53 @@ st.markdown("""
         box-shadow: 0 10px 40px rgba(108, 99, 255, 0.2);
     }
     
+    .kpi-label {
+        font-size: 0.8rem;
+        color: #A0AEC0;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 15px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    
     .kpi-value {
         font-size: 2.5rem;
         font-weight: 700;
         color: #6C63FF;
-        margin: 10px 0;
+        line-height: 1;
     }
     
-    .kpi-label {
-        font-size: 0.9rem;
-        color: #A0AEC0;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    /* Responsive KPI cards */
+    @media (max-width: 1200px) {
+        .kpi-row-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .kpi-row-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
     
-    /* Insight Box - FIXED */
+    @media (max-width: 768px) {
+        .kpi-row-4, .kpi-row-3 {
+            grid-template-columns: 1fr;
+        }
+        .kpi-value {
+            font-size: 2rem;
+        }
+    }
+    
+    /* ============================================= */
+    /* Insight Box - FIXED                          */
+    /* ============================================= */
+    
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
         border: 1px solid #6C63FF;
         border-left: 4px solid #6C63FF;
         padding: 25px 30px;
         border-radius: 12px;
-        margin: 20px 0;
+        margin: 25px 0;
     }
     
     .insight-box h4 {
@@ -92,27 +156,6 @@ st.markdown("""
         color: #FAFAFA !important;
     }
     
-    /* Success Box */
-    .success-box {
-        background: linear-gradient(135deg, #1a2e1a 0%, #1f3d1f 100%);
-        border: 1px solid #48BB78;
-        border-left: 4px solid #48BB78;
-        padding: 25px 30px;
-        border-radius: 12px;
-        margin: 20px 0;
-    }
-    
-    .success-box h4 {
-        color: #48BB78 !important;
-        margin: 0 0 15px 0 !important;
-    }
-    
-    .success-box p {
-        color: #E2E8F0 !important;
-        line-height: 1.7;
-        margin: 8px 0 !important;
-    }
-    
     /* Section Headers */
     .section-header {
         color: #FAFAFA;
@@ -133,25 +176,6 @@ st.markdown("""
         color: #FAFAFA;
     }
     
-    /* Cards */
-    .custom-card {
-        background: #1E2130;
-        border: 1px solid #3D4663;
-        padding: 20px;
-        border-radius: 12px;
-        margin: 10px 0;
-    }
-    
-    /* Metric styling override */
-    [data-testid="stMetricValue"] {
-        color: #6C63FF !important;
-        font-size: 2rem !important;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        color: #A0AEC0 !important;
-    }
-    
     /* Expander */
     .streamlit-expanderHeader {
         background: #1E2130 !important;
@@ -163,11 +187,6 @@ st.markdown("""
     /* DataFrame */
     .dataframe {
         background: #1E2130 !important;
-    }
-    
-    /* Plotly chart background */
-    .js-plotly-plot .plotly .bg {
-        fill: #0E1117 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -307,75 +326,56 @@ sec_penetration = (accepters_df['Securities_Account'].sum() / len(accepters_df) 
 st.markdown("""
 <div style="text-align: center; padding: 20px 0;">
     <h1 style="font-size: 2.5rem; margin-bottom: 10px;">🏦 Universal Bank - Personal Loan Campaign</h1>
-    <p style="color: #A0AEC0; font-size: 1.1rem;">Analyze customer data to predict loan acceptance and identify opportunities.</p>
+    <p style="color: #A0AEC0; font-size: 1.1rem;">Analyze customer data to predict loan acceptance and identify opportunities</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("---")
 
-# KPI Row 1 - 4 KPIs
+# ==========================================
+# KPI CARDS - FIXED UNIFORM LAYOUT (GRID)
+# ==========================================
 st.markdown('<p class="section-header">📊 Key Performance Indicators</p>', unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.markdown(f"""
+# KPI Row 1 - 4 cards using CSS Grid
+st.markdown(f"""
+<div class="kpi-row kpi-row-4">
     <div class="kpi-card">
         <div class="kpi-label">Total Customers</div>
         <div class="kpi-value">{total_customers:,}</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-label">Loan Accepters</div>
         <div class="kpi-value">{loan_accepters:,}</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-label">Acceptance Rate</div>
         <div class="kpi-value">{acceptance_rate:.1f}%</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col4:
-    st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-label">Avg Income (Accepters)</div>
+        <div class="kpi-label">Avg Income<br>(Accepters)</div>
         <div class="kpi-value">${avg_income_accepters:.0f}K</div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-# KPI Row 2 - 3 KPIs
-col5, col6, col7 = st.columns(3)
-
-with col5:
-    st.markdown(f"""
+# KPI Row 2 - 3 cards using CSS Grid
+st.markdown(f"""
+<div class="kpi-row kpi-row-3">
     <div class="kpi-card">
-        <div class="kpi-label">Avg CC Spend (Accepters)</div>
+        <div class="kpi-label">Avg CC Spend<br>(Accepters)</div>
         <div class="kpi-value">${avg_cc_accepters:.2f}K</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col6:
-    st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-label">CD Account Penetration</div>
+        <div class="kpi-label">CD Account<br>Penetration</div>
         <div class="kpi-value">{cd_penetration:.1f}%</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col7:
-    st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-label">Securities Penetration</div>
+        <div class="kpi-label">Securities<br>Penetration</div>
         <div class="kpi-value">{sec_penetration:.1f}%</div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 # KPI Definitions
 with st.expander("📋 KPI Definitions & Formulas"):
@@ -391,7 +391,7 @@ with st.expander("📋 KPI Definitions & Formulas"):
     | **Securities Penetration** | `SUM(Securities WHERE Loan=1) / COUNT(Accepters) × 100` | Securities ownership |
     """)
 
-# Key Insight Box - FIXED STYLING
+# Key Insight Box
 income_diff = avg_income_accepters - avg_income_non
 cd_overall = df_filtered['CD_Account'].mean() * 100
 cd_lift = cd_penetration / cd_overall if cd_overall > 0 else 0
@@ -412,10 +412,15 @@ st.markdown("---")
 # Quick Charts
 st.markdown('<p class="section-header">📈 Quick Overview Charts</p>', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+# Chart template for dark theme
+chart_template = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#FAFAFA'),
+    title_font=dict(size=16, color='#FAFAFA')
+)
 
-# Chart colors for dark theme
-chart_colors = ['#6C63FF', '#48BB78', '#F6AD55', '#FC8181', '#63B3ED']
+col1, col2 = st.columns(2)
 
 with col1:
     # Acceptance by Education
@@ -439,10 +444,7 @@ with col1:
         showlegend=False,
         yaxis_title='Acceptance Rate (%)',
         xaxis_title='',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#FAFAFA'),
-        title_font=dict(size=16, color='#FAFAFA')
+        **chart_template
     )
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
@@ -469,10 +471,7 @@ with col2:
         showlegend=False,
         yaxis_title='Acceptance Rate (%)',
         xaxis_title='Family Size',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#FAFAFA'),
-        title_font=dict(size=16, color='#FAFAFA')
+        **chart_template
     )
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
@@ -495,9 +494,7 @@ with col1:
     )
     fig.update_layout(
         height=400,
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#FAFAFA'),
-        title_font=dict(size=16, color='#FAFAFA'),
+        **chart_template,
         legend=dict(font=dict(color='#FAFAFA'))
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -522,10 +519,7 @@ with col2:
         height=400,
         showlegend=False,
         yaxis_title='Acceptance Rate (%)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#FAFAFA'),
-        title_font=dict(size=16, color='#FAFAFA')
+        **chart_template
     )
     fig.update_xaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
     fig.update_yaxes(gridcolor='#3D4663', zerolinecolor='#3D4663')
