@@ -4,7 +4,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Page config
 st.set_page_config(
     page_title="Universal Bank - Loan Analytics",
     page_icon="🏦",
@@ -12,21 +11,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS
+# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
     * { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #0E1117; }
-    
     h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
     
-    .kpi-row {
-        display: grid;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
+    .kpi-row { display: grid; gap: 20px; margin-bottom: 20px; }
     .kpi-row-4 { grid-template-columns: repeat(4, 1fr); }
     .kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
     
@@ -45,7 +38,7 @@ st.markdown("""
     }
     .kpi-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(139, 127, 255, 0.2);
+        box-shadow: 0 10px 40px rgba(123, 104, 238, 0.2);
     }
     .kpi-label {
         font-size: 0.8rem;
@@ -59,27 +52,22 @@ st.markdown("""
     .kpi-value {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #8B7FFF;
+        color: #7B68EE;
         line-height: 1;
     }
     
-    @media (max-width: 1200px) {
-        .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-        .kpi-row-4, .kpi-row-3 { grid-template-columns: 1fr; }
-        .kpi-value { font-size: 2rem; }
-    }
+    @media (max-width: 1200px) { .kpi-row-4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .kpi-row-4, .kpi-row-3 { grid-template-columns: 1fr; } .kpi-value { font-size: 2rem; } }
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #8B7FFF;
-        border-left: 4px solid #8B7FFF;
+        border: 1px solid #7B68EE;
+        border-left: 4px solid #7B68EE;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 25px 0;
     }
-    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #7B68EE !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -99,29 +87,30 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Color scheme for charts
+# ============================================
+# EXACT COLORS FROM REFERENCE
+# ============================================
 COLORS = {
-    'Not Accepted': '#636B7C',
-    'Accepted': '#8B7FFF'
+    'Not Accepted': '#5A5F72',
+    'Accepted': '#7B68EE'
 }
-COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
 
-# Chart template
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA', family='Inter'),
-    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-    legend=dict(font=dict(color='#FAFAFA')),
-    colorway=COLOR_SEQUENCE
-)
+def get_chart_layout():
+    return dict(
+        paper_bgcolor='#0E1117',
+        plot_bgcolor='#0E1117',
+        font=dict(color='#FAFAFA', family='Inter', size=12),
+        title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+        legend=dict(font=dict(color='#FAFAFA', size=11), bgcolor='rgba(0,0,0,0)'),
+        xaxis=dict(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'), title_font=dict(color='#A0AEC0')),
+        yaxis=dict(gridcolor='#2D3748', zerolinecolor='#2D3748', tickfont=dict(color='#A0AEC0'), title_font=dict(color='#A0AEC0'))
+    )
 
 # Load data
 @st.cache_data
 def load_data():
     try:
-        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx",
-                "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
+        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx", "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
         for path in paths:
             try:
                 df = pd.read_excel(path, sheet_name="Data")
@@ -153,8 +142,7 @@ def create_sample_data():
         'Online': np.random.choice([0, 1], n, p=[0.40, 0.60]),
         'CreditCard': np.random.choice([0, 1], n, p=[0.71, 0.29])
     })
-    prob = (0.02 + 0.12*(df['Income']>100) + 0.08*(df['Income']>150) + 
-            0.08*(df['Education']==3) + 0.25*(df['CD_Account']==1) + 0.04*(df['CCAvg']>3))
+    prob = (0.02 + 0.12*(df['Income']>100) + 0.08*(df['Income']>150) + 0.08*(df['Education']==3) + 0.25*(df['CD_Account']==1) + 0.04*(df['CCAvg']>3))
     df['Personal_Loan'] = (np.random.random(n) < prob).astype(int)
     return df
 
@@ -174,32 +162,16 @@ with st.sidebar:
     st.markdown("### 🔧 Filters")
     
     edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced/Professional'}
-    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3],
-                                  format_func=lambda x: edu_map[x])
-    
-    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
-                            (int(df['Income'].min()), int(df['Income'].max())))
-    
-    selected_family = st.multiselect("Family Size", options=sorted(df['Family'].unique()),
-                                     default=list(df['Family'].unique()))
+    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3], format_func=lambda x: edu_map[x])
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()), (int(df['Income'].min()), int(df['Income'].max())))
+    selected_family = st.multiselect("Family Size", options=sorted(df['Family'].unique()), default=list(df['Family'].unique()))
     
     st.markdown("---")
     with st.expander("📋 Dataset Info"):
-        st.markdown("""
-        **Columns:**
-        - `Age` - Customer age
-        - `Income` - Annual income ($K)
-        - `CCAvg` - CC spend ($K/month)
-        - `Education` - 1=UG, 2=Grad, 3=Adv
-        - `Personal_Loan` - Target (0/1)
-        """)
+        st.markdown("""**Columns:** Age, Income, CCAvg, Education, Personal_Loan, CD_Account""")
 
 # Apply filters
-df_filtered = df[
-    (df['Education'].isin(selected_edu)) &
-    (df['Income'].between(income_range[0], income_range[1])) &
-    (df['Family'].isin(selected_family))
-]
+df_filtered = df[(df['Education'].isin(selected_edu)) & (df['Income'].between(income_range[0], income_range[1])) & (df['Family'].isin(selected_family))]
 
 # Calculate KPIs
 total_customers = len(df_filtered)
@@ -228,39 +200,15 @@ st.markdown('<p class="section-header">📊 Key Performance Indicators</p>', uns
 
 st.markdown(f"""
 <div class="kpi-row kpi-row-4">
-    <div class="kpi-card">
-        <div class="kpi-label">Total Customers</div>
-        <div class="kpi-value">{total_customers:,}</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-label">Loan Accepters</div>
-        <div class="kpi-value">{loan_accepters:,}</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-label">Acceptance Rate</div>
-        <div class="kpi-value">{acceptance_rate:.1f}%</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-label">Avg Income<br>(Accepters)</div>
-        <div class="kpi-value">${avg_income_accepters:.0f}K</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-label">Total Customers</div><div class="kpi-value">{total_customers:,}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Loan Accepters</div><div class="kpi-value">{loan_accepters:,}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Acceptance Rate</div><div class="kpi-value">{acceptance_rate:.1f}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg Income<br>(Accepters)</div><div class="kpi-value">${avg_income_accepters:.0f}K</div></div>
 </div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
 <div class="kpi-row kpi-row-3">
-    <div class="kpi-card">
-        <div class="kpi-label">Avg CC Spend<br>(Accepters)</div>
-        <div class="kpi-value">${avg_cc_accepters:.2f}K</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-label">CD Account<br>Penetration</div>
-        <div class="kpi-value">{cd_penetration:.1f}%</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-label">Securities<br>Penetration</div>
-        <div class="kpi-value">{sec_penetration:.1f}%</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-label">Avg CC Spend<br>(Accepters)</div><div class="kpi-value">${avg_cc_accepters:.2f}K</div></div>
+    <div class="kpi-card"><div class="kpi-label">CD Account<br>Penetration</div><div class="kpi-value">{cd_penetration:.1f}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Securities<br>Penetration</div><div class="kpi-value">{sec_penetration:.1f}%</div></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -273,8 +221,7 @@ st.markdown(f"""
 <div class="insight-box">
     <h4>📌 Key Insight</h4>
     <p><strong>Finding:</strong> Loan accepters have an average income of <strong>${avg_income_accepters:.0f}K</strong>, 
-    which is <strong>${income_diff:.0f}K higher</strong> than non-accepters. CD account holders show 
-    <strong>{cd_penetration:.1f}%</strong> penetration among accepters vs <strong>{cd_overall:.1f}%</strong> overall.</p>
+    which is <strong>${income_diff:.0f}K higher</strong> than non-accepters.</p>
     <p><strong>Implication:</strong> Target high-income customers with CD accounts. They show 
     <strong>{cd_lift:.1f}x higher</strong> representation among loan accepters.</p>
 </div>
@@ -288,83 +235,109 @@ st.markdown('<p class="section-header">📈 Quick Overview Charts</p>', unsafe_a
 col1, col2 = st.columns(2)
 
 with col1:
-    # Acceptance by Education - Using gradient colors
-    edu_stats = df_filtered.groupby('Education').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
-    edu_stats.columns = ['Education', 'Accepted', 'Total']
-    edu_stats['Rate'] = edu_stats['Accepted'] / edu_stats['Total'] * 100
-    edu_stats['Education'] = edu_stats['Education'].map(edu_map)
-    
-    fig = px.bar(
-        edu_stats, x='Education', y='Rate',
-        title='📚 Acceptance Rate by Education',
-        color='Education',
-        color_discrete_sequence=['#8B7FFF', '#F6AD55', '#48BB78'],
-        text='Rate'
-    )
-    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='', **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
-    st.plotly_chart(fig, use_container_width=True)
-
-with col2:
-    # Acceptance by Family Size - Using gradient colors
-    fam_stats = df_filtered.groupby('Family').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
-    fam_stats.columns = ['Family', 'Accepted', 'Total']
-    fam_stats['Rate'] = fam_stats['Accepted'] / fam_stats['Total'] * 100
-    
-    fig = px.bar(
-        fam_stats, x='Family', y='Rate',
-        title='👨‍👩‍👧‍👦 Acceptance Rate by Family Size',
-        color='Family',
-        color_discrete_sequence=['#4FD1C5', '#63B3ED', '#F687B3', '#FC8181'],
-        text='Rate'
-    )
-    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', xaxis_title='Family Size', **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
-    st.plotly_chart(fig, use_container_width=True)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    # Pie Chart - Using the reference colors
+    # Pie Chart - EXACT REFERENCE COLORS
     loan_dist = df_filtered['Personal_Loan'].value_counts().reset_index()
     loan_dist.columns = ['Status', 'Count']
     loan_dist['Status'] = loan_dist['Status'].map({0: 'Not Accepted', 1: 'Accepted'})
+    loan_dist['Percent'] = loan_dist['Count'] / loan_dist['Count'].sum() * 100
     
-    fig = px.pie(
-        loan_dist, values='Count', names='Status',
+    fig = go.Figure(data=[go.Pie(
+        labels=loan_dist['Status'],
+        values=loan_dist['Count'],
+        hole=0.4,
+        marker=dict(colors=[COLORS['Not Accepted'], COLORS['Accepted']]),
+        textinfo='percent',
+        textfont=dict(color='#FAFAFA', size=14),
+        hovertemplate='%{label}: %{value:,} (%{percent})<extra></extra>'
+    )])
+    
+    fig.update_layout(
+        height=400,
         title='🎯 Loan Acceptance Distribution',
-        color='Status',
-        color_discrete_map={'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'},
-        hole=0.4
+        legend=dict(orientation='h', y=-0.1, x=0.5, xanchor='center', font=dict(color='#FAFAFA')),
+        **get_chart_layout()
     )
-    fig.update_traces(textposition='outside', textinfo='percent+label',
-                     textfont=dict(color='#FAFAFA'))
-    fig.update_layout(height=400, **chart_template)
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    # CD Account Impact - Orange gradient like reference
+    # CD Account Impact - ORANGE BAR CHART
     cd_impact = df_filtered.groupby('CD_Account')['Personal_Loan'].mean() * 100
     cd_df = pd.DataFrame({
         'CD Account': ['No', 'Yes'],
         'Acceptance Rate': [cd_impact.get(0, 0), cd_impact.get(1, 0)]
     })
     
-    fig = px.bar(
-        cd_df, x='CD Account', y='Acceptance Rate',
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=cd_df['CD Account'],
+        y=cd_df['Acceptance Rate'],
+        marker_color=['#5A5F72', '#F39C12'],  # Gray and Orange
+        text=[f"{v:.1f}%" for v in cd_df['Acceptance Rate']],
+        textposition='outside',
+        textfont=dict(color='#FAFAFA', size=14)
+    ))
+    
+    fig.update_layout(
+        height=400,
         title='🏦 CD Account Impact on Loan Acceptance',
-        color='Acceptance Rate',
-        color_continuous_scale=[[0, '#636B7C'], [0.5, '#F6AD55'], [1, '#F6AD55']],
-        text='Acceptance Rate'
+        yaxis_title='Acceptance Rate (%)',
+        showlegend=False,
+        **get_chart_layout()
     )
-    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False, yaxis_title='Acceptance Rate (%)', **chart_template)
-    fig.update_xaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
-    fig.update_yaxes(gridcolor='#2D3748', zerolinecolor='#2D3748')
+    st.plotly_chart(fig, use_container_width=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Education Bar Chart - Different colors for each bar
+    edu_stats = df_filtered.groupby('Education').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
+    edu_stats.columns = ['Education', 'Accepted', 'Total']
+    edu_stats['Rate'] = edu_stats['Accepted'] / edu_stats['Total'] * 100
+    edu_stats['Education'] = edu_stats['Education'].map(edu_map)
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=edu_stats['Education'],
+        y=edu_stats['Rate'],
+        marker_color=['#3498DB', '#9B59B6', '#1ABC9C'],  # Blue, Purple, Teal
+        text=[f"{v:.1f}%" for v in edu_stats['Rate']],
+        textposition='outside',
+        textfont=dict(color='#FAFAFA', size=12)
+    ))
+    
+    fig.update_layout(
+        height=400,
+        title='📚 Acceptance Rate by Education',
+        yaxis_title='Acceptance Rate (%)',
+        showlegend=False,
+        **get_chart_layout()
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    # Family Size Bar Chart - Different colors
+    fam_stats = df_filtered.groupby('Family').agg({'Personal_Loan': ['sum', 'count']}).reset_index()
+    fam_stats.columns = ['Family', 'Accepted', 'Total']
+    fam_stats['Rate'] = fam_stats['Accepted'] / fam_stats['Total'] * 100
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=fam_stats['Family'],
+        y=fam_stats['Rate'],
+        marker_color=['#E74C3C', '#F39C12', '#2ECC71', '#3498DB'],  # Red, Orange, Green, Blue
+        text=[f"{v:.1f}%" for v in fam_stats['Rate']],
+        textposition='outside',
+        textfont=dict(color='#FAFAFA', size=12)
+    ))
+    
+    fig.update_layout(
+        height=400,
+        title='👨‍👩‍👧‍👦 Acceptance Rate by Family Size',
+        xaxis_title='Family Size',
+        yaxis_title='Acceptance Rate (%)',
+        showlegend=False,
+        **get_chart_layout()
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 # Data Preview
@@ -373,13 +346,7 @@ st.markdown('<p class="section-header">📁 Data Preview</p>', unsafe_allow_html
 
 col1, col2 = st.columns([4, 1])
 with col2:
-    st.download_button(
-        label="📥 Download CSV",
-        data=df_filtered.to_csv(index=False),
-        file_name="loan_data.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
+    st.download_button(label="📥 Download CSV", data=df_filtered.to_csv(index=False), file_name="loan_data.csv", mime="text/csv", use_container_width=True)
 
 st.dataframe(df_filtered.head(100), use_container_width=True, height=300)
 st.caption(f"Showing 100 of {len(df_filtered):,} filtered records")
