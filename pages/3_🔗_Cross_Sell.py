@@ -4,11 +4,34 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="Cross-Sell Analysis", page_icon="🔗", layout="wide")
+# Page config - SAME TITLE FOR BROWSER TAB
+st.set_page_config(
+    page_title="Universal Bank - Loan Analytics",
+    page_icon="🏦",
+    layout="wide"
+)
 
-# Dark theme CSS
+# SHARED CSS - Must be on every page
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', sans-serif; }
+    .stApp { background-color: #0E1117; }
+    
+    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
+    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
+        display: none;
+    }
+    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
+        content: "📊 Overview";
+        display: block;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    
+    h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
+    
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
         border: 1px solid #6C63FF;
@@ -17,9 +40,10 @@ st.markdown("""
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #6C63FF !important; margin: 0 0 15px 0 !important; }
-    .insight-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
+    .insight-box h4 { color: #6C63FF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
+    
     .success-box {
         background: linear-gradient(135deg, #1a2e1a 0%, #1f3d1f 100%);
         border: 1px solid #48BB78;
@@ -30,6 +54,7 @@ st.markdown("""
     }
     .success-box h4 { color: #48BB78 !important; margin: 0 0 15px 0 !important; }
     .success-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
+    
     .section-header {
         color: #FAFAFA;
         font-size: 1.3rem;
@@ -37,6 +62,11 @@ st.markdown("""
         margin: 30px 0 20px 0;
         padding-bottom: 10px;
         border-bottom: 2px solid #3D4663;
+    }
+    
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0E1117 0%, #1E2130 100%);
+        border-right: 1px solid #3D4663;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -75,27 +105,37 @@ df = load_data()
 df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
 
 # Sidebar
-st.sidebar.header("🔧 Filters")
+with st.sidebar:
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 3rem;">🏦</div>
+        <h2 style="color: #FAFAFA; margin: 10px 0;">Universal Bank</h2>
+        <p style="color: #A0AEC0; font-size: 0.9rem;">Personal Loan Analytics</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### 🔧 Filters")
 
-income_range = st.sidebar.slider(
-    "Income Range ($K)",
-    int(df['Income'].min()), int(df['Income'].max()),
-    (int(df['Income'].min()), int(df['Income'].max()))
-)
+    income_range = st.slider(
+        "Income Range ($K)",
+        int(df['Income'].min()), int(df['Income'].max()),
+        (int(df['Income'].min()), int(df['Income'].max()))
+    )
 
-cd_filter = st.sidebar.multiselect(
-    "CD Account",
-    options=[0, 1],
-    default=[0, 1],
-    format_func=lambda x: 'Yes' if x == 1 else 'No'
-)
+    cd_filter = st.multiselect(
+        "CD Account",
+        options=[0, 1],
+        default=[0, 1],
+        format_func=lambda x: 'Yes' if x == 1 else 'No'
+    )
 
-sec_filter = st.sidebar.multiselect(
-    "Securities Account",
-    options=[0, 1],
-    default=[0, 1],
-    format_func=lambda x: 'Yes' if x == 1 else 'No'
-)
+    sec_filter = st.multiselect(
+        "Securities Account",
+        options=[0, 1],
+        default=[0, 1],
+        format_func=lambda x: 'Yes' if x == 1 else 'No'
+    )
 
 # Apply filters
 df_f = df[
@@ -103,7 +143,8 @@ df_f = df[
     (df['CD_Account'].isin(cd_filter)) &
     (df['Securities_Account'].isin(sec_filter))
 ]
-st.sidebar.metric("Records", f"{len(df_f):,}")
+
+st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
 
 chart_template = dict(
     paper_bgcolor='rgba(0,0,0,0)',
@@ -207,7 +248,7 @@ for i, (col_name, label, color) in enumerate(products):
 
 st.markdown("---")
 
-# Heatmap: CD vs Securities
+# Heatmap
 st.markdown('<p class="section-header">📊 Cross-Sell Heatmap: CD Account vs Securities Account</p>', unsafe_allow_html=True)
 
 pivot = df_f.pivot_table(
@@ -234,11 +275,7 @@ fig = go.Figure(data=go.Heatmap(
     textfont={'size': 14, 'color': '#FAFAFA'}
 ))
 
-fig.update_layout(
-    height=400,
-    title='Loan Acceptance Rate: CD Account × Securities Account',
-    **chart_template
-)
+fig.update_layout(height=400, title='Loan Acceptance Rate: CD Account × Securities Account', **chart_template)
 
 st.plotly_chart(fig, use_container_width=True)
 
