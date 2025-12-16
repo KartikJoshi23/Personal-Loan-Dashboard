@@ -4,43 +4,25 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Page config - SAME TITLE FOR BROWSER TAB
-st.set_page_config(
-    page_title="Universal Bank - Loan Analytics",
-    page_icon="🏦",
-    layout="wide"
-)
+st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# SHARED CSS - Must be on every page
+# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
     * { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #0E1117; }
-    
-    /* RENAME "app" to "Overview" - MUST BE ON EVERY PAGE */
-    [data-testid="stSidebarNav"] > ul > li:first-child > a > span {
-        display: none;
-    }
-    [data-testid="stSidebarNav"] > ul > li:first-child > a::after {
-        content: "📊 Overview";
-        display: block;
-        margin-left: 10px;
-        font-size: 14px;
-    }
-    
     h1, h2, h3 { color: #FAFAFA !important; font-weight: 700 !important; }
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #6C63FF;
-        border-left: 4px solid #6C63FF;
+        border: 1px solid #8B7FFF;
+        border-left: 4px solid #8B7FFF;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #6C63FF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #8B7FFF !important; font-size: 1.1rem; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
@@ -59,6 +41,19 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Colors
+COLORS = {'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'}
+COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
+
+chart_template = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    font=dict(color='#FAFAFA', family='Inter'),
+    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
+    legend=dict(font=dict(color='#FAFAFA')),
+    colorway=COLOR_SEQUENCE
+)
 
 # Load data
 @st.cache_data
@@ -112,26 +107,16 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 🔧 Filters")
-
+    
     edu_map = {1: 'Undergraduate', 2: 'Graduate', 3: 'Advanced'}
-    selected_edu = st.multiselect(
-        "Education Level",
-        options=[1, 2, 3],
-        default=[1, 2, 3],
-        format_func=lambda x: edu_map[x]
-    )
-
-    selected_fam = st.multiselect(
-        "Family Size",
-        options=sorted(df['Family'].unique()),
-        default=list(df['Family'].unique())
-    )
-
-    income_range = st.slider(
-        "Income Range ($K)",
-        int(df['Income'].min()), int(df['Income'].max()),
-        (int(df['Income'].min()), int(df['Income'].max()))
-    )
+    selected_edu = st.multiselect("Education Level", options=[1, 2, 3], default=[1, 2, 3],
+                                  format_func=lambda x: edu_map[x])
+    
+    selected_fam = st.multiselect("Family Size", options=sorted(df['Family'].unique()),
+                                  default=list(df['Family'].unique()))
+    
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
+                            (int(df['Income'].min()), int(df['Income'].max())))
 
 # Apply filters
 df_f = df[
@@ -142,14 +127,6 @@ df_f = df[
 
 st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
 
-colors = {'Not Accepted': '#3D4663', 'Accepted': '#6C63FF'}
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA'),
-    title_font=dict(size=16, color='#FAFAFA')
-)
-
 # Header
 st.markdown("""
 <div style="text-align: center; padding: 10px 0 30px 0;">
@@ -159,7 +136,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 5: ZIP Code Region Analysis
+# CHART 5: ZIP Code Region Analysis - Teal/Green gradient
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 5: ZIP Code Region Analysis</p>', unsafe_allow_html=True)
 
@@ -177,13 +154,14 @@ zip_agg = zip_agg[zip_agg['Customers'] >= 10]
 fig = px.scatter(
     zip_agg, x='Avg_Income', y='Acceptance_Rate',
     size='Customers', color='Acceptance_Rate',
-    color_continuous_scale=['#3D4663', '#48BB78'],
+    color_continuous_scale=[[0, '#636B7C'], [0.5, '#4FD1C5'], [1, '#48BB78']],
     hover_data=['ZIP_Region'],
     title='ZIP Region: Average Income vs Loan Acceptance Rate'
 )
 fig.update_layout(height=500, **chart_template)
-fig.update_xaxes(gridcolor='#3D4663', title='Average Income ($K)')
-fig.update_yaxes(gridcolor='#3D4663', title='Acceptance Rate (%)')
+fig.update_xaxes(gridcolor='#2D3748', title='Average Income ($K)')
+fig.update_yaxes(gridcolor='#2D3748', title='Acceptance Rate (%)')
+fig.update_traces(marker=dict(line=dict(width=1, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -201,20 +179,22 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 6: Education vs Income
+# CHART 6: Education vs Income - Beautiful box plot
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 6: Income Distribution by Education Level</p>', unsafe_allow_html=True)
 
 fig = px.box(
     df_f, x='Education_Label', y='Income', color='Loan_Status',
-    color_discrete_map=colors,
+    color_discrete_map=COLORS,
     category_orders={'Education_Label': ['Undergraduate', 'Graduate', 'Advanced']},
     title='Income Distribution by Education Level and Loan Status'
 )
 fig.update_layout(height=500, **chart_template)
 fig.update_layout(legend=dict(orientation='h', y=1.1, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#3D4663')
-fig.update_yaxes(gridcolor='#3D4663', title='Income ($K)')
+fig.update_xaxes(gridcolor='#2D3748')
+fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
+fig.update_traces(marker=dict(outliercolor='#F6AD55', size=4),
+                 line=dict(color='#FAFAFA', width=1))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -233,7 +213,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 7: Family vs Income with Toggle
+# CHART 7: Family vs Income with Toggle - Multi-color
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 7: Family Size Analysis (Variable Toggle)</p>', unsafe_allow_html=True)
 
@@ -247,15 +227,15 @@ plot_df['Size'] = plot_df[size_var] + 1
 fig = px.scatter(
     plot_df, x='Family', y='Income',
     size='Size', color='Loan_Status',
-    color_discrete_map=colors,
+    color_discrete_map=COLORS,
     title=f'Income by Family Size (bubble size = {size_var})',
     hover_data=[size_var, 'Education_Label']
 )
 fig.update_layout(height=500, **chart_template)
 fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#3D4663', title='Family Size')
-fig.update_yaxes(gridcolor='#3D4663', title='Income ($K)')
-fig.update_traces(marker=dict(opacity=0.6, sizemin=4))
+fig.update_xaxes(gridcolor='#2D3748', title='Family Size')
+fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
+fig.update_traces(marker=dict(opacity=0.7, sizemin=4, line=dict(width=0.5, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -274,7 +254,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # =============================================================================
-# CHART 8: Mortgage Multi-Dimensional
+# CHART 8: Mortgage Multi-Dimensional - Pink accent
 # =============================================================================
 st.markdown('<p class="section-header">📊 Chart 8: Mortgage Analysis (Multi-Dimensional)</p>', unsafe_allow_html=True)
 
@@ -286,16 +266,16 @@ plot_df = df_f[df_f['Mortgage'] <= pctl]
 fig = px.scatter(
     plot_df, x='Mortgage', y='Income',
     size='Family', color='Loan_Status',
-    color_discrete_map=colors,
+    color_discrete_map=COLORS,
     size_max=20,
     title='Mortgage vs Income (Size=Family, Color=Loan Status)',
     hover_data=['Education_Label', 'CCAvg', 'Age']
 )
 fig.update_layout(height=500, **chart_template)
 fig.update_layout(legend=dict(orientation='h', y=1.08, x=0.5, xanchor='center'))
-fig.update_xaxes(gridcolor='#3D4663', title='Mortgage ($K)')
-fig.update_yaxes(gridcolor='#3D4663', title='Income ($K)')
-fig.update_traces(marker=dict(opacity=0.6))
+fig.update_xaxes(gridcolor='#2D3748', title='Mortgage ($K)')
+fig.update_yaxes(gridcolor='#2D3748', title='Income ($K)')
+fig.update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='#1E2130')))
 
 st.plotly_chart(fig, use_container_width=True)
 
