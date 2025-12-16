@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Universal Bank - Loan Analytics", page_icon="🏦", layout="wide")
 
-# CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -16,25 +15,25 @@ st.markdown("""
     
     .insight-box {
         background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-        border: 1px solid #8B7FFF;
-        border-left: 4px solid #8B7FFF;
+        border: 1px solid #7B68EE;
+        border-left: 4px solid #7B68EE;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .insight-box h4 { color: #8B7FFF !important; margin: 0 0 15px 0 !important; }
+    .insight-box h4 { color: #7B68EE !important; margin: 0 0 15px 0 !important; }
     .insight-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
     .insight-box strong { color: #FAFAFA !important; }
     
     .success-box {
         background: linear-gradient(135deg, #1a2e1a 0%, #1f3d1f 100%);
-        border: 1px solid #48BB78;
-        border-left: 4px solid #48BB78;
+        border: 1px solid #2ECC71;
+        border-left: 4px solid #2ECC71;
         padding: 25px 30px;
         border-radius: 12px;
         margin: 20px 0;
     }
-    .success-box h4 { color: #48BB78 !important; margin: 0 0 15px 0 !important; }
+    .success-box h4 { color: #2ECC71 !important; margin: 0 0 15px 0 !important; }
     .success-box p { color: #E2E8F0 !important; line-height: 1.7; margin: 8px 0 !important; }
     
     .section-header {
@@ -53,25 +52,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Colors
-COLORS = {'Not Accepted': '#636B7C', 'Accepted': '#8B7FFF'}
-COLOR_SEQUENCE = ['#8B7FFF', '#F6AD55', '#48BB78', '#4FD1C5', '#F687B3', '#63B3ED', '#FC8181']
-
-chart_template = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(color='#FAFAFA', family='Inter'),
-    title_font=dict(size=16, color='#FAFAFA', family='Inter'),
-    legend=dict(font=dict(color='#FAFAFA')),
-    colorway=COLOR_SEQUENCE
-)
-
-# Load data
 @st.cache_data
 def load_data():
     try:
-        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx",
-                "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
+        paths = ["UniversalBank.xlsx", "data/UniversalBank.xlsx", "UniversalBank with description.xls", "data/UniversalBank with description.xls"]
         for path in paths:
             try:
                 df = pd.read_excel(path, sheet_name="Data")
@@ -99,7 +83,6 @@ def load_data():
 df = load_data()
 df['Loan_Status'] = df['Personal_Loan'].map({0: 'Not Accepted', 1: 'Accepted'})
 
-# Sidebar
 with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 20px 0;">
@@ -112,25 +95,14 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🔧 Filters")
     
-    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()),
-                            (int(df['Income'].min()), int(df['Income'].max())))
-    
-    cd_filter = st.multiselect("CD Account", options=[0, 1], default=[0, 1],
-                               format_func=lambda x: 'Yes' if x == 1 else 'No')
-    
-    sec_filter = st.multiselect("Securities Account", options=[0, 1], default=[0, 1],
-                                format_func=lambda x: 'Yes' if x == 1 else 'No')
+    income_range = st.slider("Income Range ($K)", int(df['Income'].min()), int(df['Income'].max()), (int(df['Income'].min()), int(df['Income'].max())))
+    cd_filter = st.multiselect("CD Account", options=[0, 1], default=[0, 1], format_func=lambda x: 'Yes' if x == 1 else 'No')
+    sec_filter = st.multiselect("Securities Account", options=[0, 1], default=[0, 1], format_func=lambda x: 'Yes' if x == 1 else 'No')
 
-# Apply filters
-df_f = df[
-    (df['Income'].between(income_range[0], income_range[1])) &
-    (df['CD_Account'].isin(cd_filter)) &
-    (df['Securities_Account'].isin(sec_filter))
-]
+df_f = df[(df['Income'].between(income_range[0], income_range[1])) & (df['CD_Account'].isin(cd_filter)) & (df['Securities_Account'].isin(sec_filter))]
 
 st.sidebar.metric("Filtered Records", f"{len(df_f):,}")
 
-# Header
 st.markdown("""
 <div style="text-align: center; padding: 10px 0 30px 0;">
     <h1 style="color: #FAFAFA;">🔗 Cross-Sell Analysis</h1>
@@ -139,13 +111,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# CHART 9: Cross-Sell Pattern Analysis - Green gradient
+# Cross-Sell Pattern Analysis
 # =============================================================================
-st.markdown('<p class="section-header">📊 Chart 9: Cross-Sell Pattern Analysis</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-header">📊 Cross-Sell Pattern Analysis</p>', unsafe_allow_html=True)
 
-st.info("💡 Analyzing how combinations of existing products (Securities, CD Account, Credit Card) impact loan acceptance rates.")
+st.info("💡 Analyzing how combinations of existing products impact loan acceptance rates.")
 
-# Create product combinations
 df_f['Combo'] = (
     df_f['Securities_Account'].map({0: '', 1: 'Sec'}) + 
     df_f['CD_Account'].map({0: '', 1: '+CD'}) + 
@@ -153,28 +124,37 @@ df_f['Combo'] = (
 )
 df_f['Combo'] = df_f['Combo'].str.lstrip('+').replace('', 'None')
 
-combo_stats = df_f.groupby('Combo').agg({
-    'Personal_Loan': ['mean', 'sum', 'count']
-}).reset_index()
+combo_stats = df_f.groupby('Combo').agg({'Personal_Loan': ['mean', 'sum', 'count']}).reset_index()
 combo_stats.columns = ['Combo', 'Rate', 'Accepted', 'Total']
 combo_stats['Rate'] *= 100
-combo_stats = combo_stats.sort_values('Rate', ascending=False)
+combo_stats = combo_stats.sort_values('Rate', ascending=True)
 
-fig = px.bar(
-    combo_stats, x='Combo', y='Rate',
-    color='Rate',
-    color_continuous_scale=[[0, '#636B7C'], [0.5, '#48BB78'], [1, '#48BB78']],
-    text='Rate',
-    title='Loan Acceptance Rate by Product Combination'
+fig = go.Figure()
+fig.add_trace(go.Bar(
+    y=combo_stats['Combo'],
+    x=combo_stats['Rate'],
+    orientation='h',
+    marker_color=['#E74C3C', '#F39C12', '#3498DB', '#9B59B6', '#1ABC9C', '#2ECC71', '#27AE60', '#16A085'][:len(combo_stats)],
+    text=[f"{v:.1f}%" for v in combo_stats['Rate']],
+    textposition='outside',
+    textfont=dict(color='#FAFAFA', size=12)
+))
+
+fig.update_layout(
+    height=450,
+    title=dict(text='Loan Acceptance Rate by Product Combination', font=dict(color='#FAFAFA', size=16)),
+    xaxis_title='Acceptance Rate (%)',
+    showlegend=False,
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
 )
-fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-fig.update_layout(height=450, showlegend=False, **chart_template)
-fig.update_xaxes(gridcolor='#2D3748', title='Product Combination')
-fig.update_yaxes(gridcolor='#2D3748', title='Acceptance Rate (%)')
 
 st.plotly_chart(fig, use_container_width=True)
 
-best = combo_stats.iloc[0]
+best = combo_stats.iloc[-1]
 overall = df_f['Personal_Loan'].mean() * 100
 
 st.markdown(f"""
@@ -189,15 +169,15 @@ st.markdown(f"""
 
 st.markdown("---")
 
-# Individual Product Impact - Different colors for each
+# Individual Product Impact
 st.markdown('<p class="section-header">📊 Individual Product Impact on Loan Acceptance</p>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
 products = [
-    ('CD_Account', 'CD Account', ['#636B7C', '#F6AD55']),
-    ('Securities_Account', 'Securities Account', ['#636B7C', '#63B3ED']),
-    ('CreditCard', 'Credit Card', ['#636B7C', '#F687B3'])
+    ('CD_Account', 'CD Account', ['#5A5F72', '#F39C12']),
+    ('Securities_Account', 'Securities Account', ['#5A5F72', '#3498DB']),
+    ('CreditCard', 'Credit Card', ['#5A5F72', '#E74C3C'])
 ]
 
 for i, (col_name, label, colors) in enumerate(products):
@@ -206,55 +186,58 @@ for i, (col_name, label, colors) in enumerate(products):
         no_p = df_f[df_f[col_name] == 0]['Personal_Loan'].mean() * 100
         lift = has_p / no_p if no_p > 0 else 0
         
-        comp = pd.DataFrame({
-            'Status': [f'No {label}', f'Has {label}'],
-            'Rate': [no_p, has_p]
-        })
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=['No', 'Yes'],
+            y=[no_p, has_p],
+            marker_color=colors,
+            text=[f"{no_p:.1f}%", f"{has_p:.1f}%"],
+            textposition='outside',
+            textfont=dict(color='#FAFAFA', size=12)
+        ))
         
-        fig = px.bar(
-            comp, x='Status', y='Rate',
-            color='Status',
-            color_discrete_sequence=colors,
-            text='Rate', title=f'{label} Impact'
+        fig.update_layout(
+            height=350,
+            title=dict(text=f'{label} Impact', font=dict(color='#FAFAFA', size=14)),
+            yaxis_title='Acceptance Rate (%)',
+            showlegend=False,
+            paper_bgcolor='#0E1117',
+            plot_bgcolor='#0E1117',
+            font=dict(color='#FAFAFA'),
+            xaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0')),
+            yaxis=dict(gridcolor='#2D3748', tickfont=dict(color='#A0AEC0'))
         )
-        fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-        fig.update_layout(height=350, showlegend=False, **chart_template)
-        fig.update_xaxes(gridcolor='#2D3748', title='')
-        fig.update_yaxes(gridcolor='#2D3748', title='Acceptance Rate (%)')
         st.plotly_chart(fig, use_container_width=True)
-        
         st.markdown(f"**Lift: {lift:.1f}x** more likely to accept")
 
 st.markdown("---")
 
-# Heatmap - Purple-Green
+# Heatmap
 st.markdown('<p class="section-header">📊 Cross-Sell Heatmap: CD Account vs Securities Account</p>', unsafe_allow_html=True)
 
-pivot = df_f.pivot_table(
-    values='Personal_Loan',
-    index='CD_Account',
-    columns='Securities_Account',
-    aggfunc='mean'
-) * 100
-
-count_pivot = df_f.pivot_table(
-    values='Personal_Loan',
-    index='CD_Account',
-    columns='Securities_Account',
-    aggfunc='count'
-)
+pivot = df_f.pivot_table(values='Personal_Loan', index='CD_Account', columns='Securities_Account', aggfunc='mean') * 100
+count_pivot = df_f.pivot_table(values='Personal_Loan', index='CD_Account', columns='Securities_Account', aggfunc='count')
 
 fig = go.Figure(data=go.Heatmap(
     z=pivot.values,
     x=['No Securities', 'Has Securities'],
     y=['No CD Account', 'Has CD Account'],
-    colorscale=[[0, '#636B7C'], [0.5, '#4FD1C5'], [1, '#48BB78']],
+    colorscale=[[0, '#5A5F72'], [0.5, '#4FD1C5'], [1, '#2ECC71']],
     text=[[f'{pivot.iloc[i,j]:.1f}%\nn={int(count_pivot.iloc[i,j])}' for j in range(2)] for i in range(2)],
     texttemplate='%{text}',
-    textfont={'size': 14, 'color': '#FAFAFA'}
+    textfont={'size': 14, 'color': '#FAFAFA'},
+    hovertemplate='%{y} × %{x}<br>Rate: %{z:.1f}%<extra></extra>'
 ))
 
-fig.update_layout(height=400, title='Loan Acceptance Rate: CD Account × Securities Account', **chart_template)
+fig.update_layout(
+    height=400,
+    title=dict(text='Loan Acceptance Rate: CD Account × Securities Account', font=dict(color='#FAFAFA', size=16)),
+    paper_bgcolor='#0E1117',
+    plot_bgcolor='#0E1117',
+    font=dict(color='#FAFAFA'),
+    xaxis=dict(tickfont=dict(color='#A0AEC0')),
+    yaxis=dict(tickfont=dict(color='#A0AEC0'))
+)
 
 st.plotly_chart(fig, use_container_width=True)
 
